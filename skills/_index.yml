@@ -1,0 +1,24 @@
+generated: '2026-08-23'
+method: generated
+source: >-
+  openapi/inrupt-notification-openapi.yaml, mcp/inrupt-mcp.yml, conventions/inrupt-conventions.yml,
+  errors/inrupt-problem-types.yml
+note: >-
+  Two packaged Agent Skills covering Inrupt's two agent-facing surfaces. Every operationId in the
+  notification skill was verified present in the published OpenAPI; every tool name and parameter in
+  the MCP skill was transcribed from Inrupt's MCP Resource Service reference. No skill was written for
+  the Platform Management, Access Grant, Pod Storage or Search APIs because those publish no
+  machine-readable contract to ground operation identifiers in.
+skills:
+- name: inrupt-subscribe-to-pod-events
+  file: inrupt-subscribe-to-pod-events.md
+  api: Inrupt Change Notifications API (ESS Notification Delivery Service)
+  surface: rest
+  operations: [negotiate, createSubscription, listSubscriptions, fetchSubscription, removeSubscription, getJsonWebKeySet, listDeliveryFailures]
+  summary: Subscribe to Pod resource and consent-lifecycle events, verify RFC 9421 signatures, reconcile delivery failures.
+- name: inrupt-agent-request-consent
+  file: inrupt-agent-request-consent.md
+  api: Inrupt ESS MCP Resource Service
+  surface: mcp
+  operations: [requestAccess, checkAccessRequestStatus, hasMatchingAccessGrant, getResource]
+  summary: The consent round trip - check for an existing grant, ask, wait for the human, then read.

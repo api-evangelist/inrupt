@@ -1,0 +1,107 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  https://login.inrupt.com/.well-known/openid-configuration (probed),
+  openapi/inrupt-notification-openapi.yaml (derived),
+  https://docs.inrupt.com/guides/authentication-in-solid,
+  https://docs.inrupt.com/security/authentication,
+  https://docs.inrupt.com/ess/services/service-platform-management/token-exchange
+docs: https://docs.inrupt.com/security/authentication
+summary:
+  types:
+  - openIdConnect
+  - oauth2
+  - http
+  - mutualTLS
+  primary: Solid-OIDC bearer tokens, DPoP-bound where the deployment requires proof of possession.
+schemes:
+- name: SolidAuthentication
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  sources:
+  - openapi/inrupt-notification-openapi.yaml
+  description: >-
+    The security scheme declared in the published Notification Delivery Service OpenAPI. It is applied
+    per-operation on every /subscriptions and /system/subscriptions operation; the discovery (POST /)
+    and JWKS (GET /jwks) operations are unauthenticated.
+- name: SolidOIDC
+  type: openIdConnect
+  openIdConnectUrl: https://login.inrupt.com/.well-known/openid-configuration
+  issuer: https://login.inrupt.com
+  sources:
+  - https://login.inrupt.com/.well-known/openid-configuration
+  description: >-
+    Hosted Solid OpenID Provider for PodSpaces WebIDs. Supports authorization_code (with PKCE S256),
+    refresh_token and client_credentials, dynamic client registration, revocation and end-session.
+  scopes:
+  - openid
+  - offline_access
+  - webid
+  claims:
+  - sub
+  - webid
+  - iss
+  - aud
+  id_token_signing_algs:
+  - RS256
+  - ES256
+- name: DPoP
+  type: oauth2
+  description: >-
+    Demonstrating Proof of Possession (RFC 9449). The provider advertises
+    dpop_signing_alg_values_supported [RS256, ES256]; ESS request examples use
+    "Authorization: DPoP <token>" together with a "DPoP: <proof>" header, which binds the token to the
+    client key so a stolen bearer token is not enough.
+  sources:
+  - https://login.inrupt.com/.well-known/openid-configuration
+  - https://docs.inrupt.com/ess/services/service-pod-management/data-views-api
+- name: TokenExchange
+  type: oauth2
+  flow: urn:ietf:params:oauth:grant-type:token-exchange
+  endpoint: https://platform.{ess-domain}/access/token
+  description: >-
+    ESS 3.0 native IdP support. A client authenticates with its own external OIDC Identity Provider,
+    then exchanges the resulting id_token (subject_token_type
+    urn:ietf:params:oauth:token-type:id_token) for an ESS Access Token. The issuer must be on the
+    deployment's trusted-issuer allow list. Default token TTL is 5 minutes; clients should re-exchange
+    proactively using expires_in and retry once on 401.
+  sources:
+  - https://docs.inrupt.com/ess/services/service-platform-management/token-exchange
+  - https://docs.inrupt.com/guides/integrating-with-ess-mcp
+- name: ClientCredentials
+  type: oauth2
+  flow: clientCredentials
+  description: >-
+    Server-side applications authenticate as themselves (a single-user or service application) using
+    client credentials registered with the identity provider.
+  sources:
+  - https://docs.inrupt.com/guides/authentication-in-solid/authentication-server-side
+  - https://docs.inrupt.com/sdk/java-sdk/authentication/session-management
+- name: ClientIdDocument
+  type: openIdConnect
+  description: >-
+    Solid-OIDC Client Identifier Documents - a client is identified by a dereferenceable URI hosting a
+    JSON-LD Client ID Document rather than by a registered client_id string. ESS deployments maintain
+    allow lists of client IDs for authorization and initial Pod access.
+  sources:
+  - https://docs.inrupt.com/guides/identity-in-solid/the-client-id-document
+  - https://docs.inrupt.com/sdk/java-sdk/authentication/solid-oidc-client-identifiers
+- name: WebhookMutualTLS
+  type: mutualTLS
+  description: >-
+    Outbound only. A notification subscription may carry dispatch.authentication of type mtls with a
+    PEM-formatted X.509 serverCertificate, so the Notification Delivery Service can authenticate the
+    subscriber's webhook endpoint.
+  sources:
+  - openapi/inrupt-notification-openapi.yaml
+  - https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+outbound_message_authentication:
+  standard: RFC 9421 HTTP Message Signatures
+  keys: https://notification.{ess-domain}/jwks
+  description: >-
+    Webhooks receive signed requests; the receiver verifies with the published JWK Set before
+    processing. This is the reverse direction of the schemes above and is required, not optional.
+authorization_note: >-
+  Authentication establishes a WebID. Authorization is separate - see scopes/inrupt-scopes.yml for the
+  ACP + Access Grant model.

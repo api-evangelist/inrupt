@@ -1,0 +1,69 @@
+generated: '2026-08-23'
+method: searched
+source: https://docs.inrupt.com/ess/releases and https://docs.inrupt.com/ess/releases/changelog
+docs: https://docs.inrupt.com/ess/releases
+scheme: semver
+product: Enterprise Solid Server
+current_version: 3.2.0
+current_version_released: '2026-07-24'
+note: >-
+  Inrupt maintains dated release notes per ESS minor version plus a separate 3.x changelog page. There
+  is also a marketing-side release index at https://www.inrupt.com/release/. SDK release notes are
+  tracked separately at https://docs.inrupt.com/sdk/javascript-sdk/release-notes and
+  https://docs.inrupt.com/sdk/java-sdk/release-notes.
+entries:
+- version: 3.2.0
+  date: '2026-07-24'
+  breaking: false
+  highlights:
+  - >-
+    Adds the optional Search Service - hybrid (BM25 keyword + pgvector semantic, merged with Reciprocal
+    Rank Fusion), keyword-only and semantic-only search over Pod content, at https://search.<ESS Domain>.
+  - >-
+    Four cooperating microservices: Search (query API, facets, metadata, index management), Ingest
+    (consumes encrypted Kafka events, extracts text from PDFs/images/Office/HTML/JSON/RDF, dual-writes
+    to OpenSearch and pgvector), Embedding (384-dimensional BAAI/bge-small-en-v1.5 over mTLS), OCR
+    (RapidOCR fallback for PDFs and images).
+  - >-
+    Graceful degradation - when the Embedding Service is unavailable hybrid search falls back to
+    keyword-only and affected ingest events queue to a dead-letter queue for replay.
+  - Replaces the Query/QPF (Fragments) Service removed in 3.0.
+- version: 3.1.0
+  date: '2026-06-29'
+  breaking: false
+  highlights:
+  - >-
+    Least-privilege database credential separation for PostgreSQL-backed services - DDL credentials
+    for Flyway migrations at startup, DML credentials restricted to CONNECT/USAGE/SELECT/INSERT/UPDATE/
+    DELETE on the public schema at runtime.
+  - Opt-in; both credential sets reference the same Kubernetes secret by default, so no upgrade work.
+- version: 3.0.0
+  date: '2026-05-27'
+  breaking: true
+  highlights:
+  - >-
+    Native Identity Provider support - clients authenticate with an existing OIDC IdP and exchange the
+    token for an ESS Access Token via the Platform Management token-exchange endpoint. The ESS OpenID
+    Broker is no longer required as an intermediary.
+  - >-
+    Permanent, globally unique identifiers for storages, resources, agents and clients; resources are
+    addressable by canonical URI ({storage-id}/sc/{resource-id}) as well as path URI
+    ({storage-id}/sp/{resource-path}). Access Grant issuing and notification subscriptions MUST use
+    canonical URIs.
+  - >-
+    Simplified Access Grant flow - UMA removed; grants act as receipts and ESS checks them server-side,
+    with no VC Matcher policies or ACP enablement required.
+  - Environment isolation - each service can run in its own named PostgreSQL schema.
+  - Unified user provisioning through the Platform Management service.
+  - Adds the MCP Service and MCP Resource Service for AI agent integration.
+  removed:
+  - UMA Service
+  - Query / QPF (Fragments) Service
+  - Notification Gateway Service
+  - WebSocket Notification Service
+  - Wallet Service
+- version: 2.7.x
+  date: '2026-01-13'
+  breaking: false
+  highlights:
+  - Enhanced enterprise-grade sharing controls (https://www.inrupt.com/release/ess-version-2-7-enhances-enterprise-grade-sharing-controls).

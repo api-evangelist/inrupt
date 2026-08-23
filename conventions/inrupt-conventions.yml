@@ -1,0 +1,168 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  openapi/inrupt-notification-openapi.yaml,
+  https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service,
+  https://docs.inrupt.com/ess/services/service-platform-management/platform-management-api,
+  https://docs.inrupt.com/ess/services/service-pod-management/data-views-api,
+  https://docs.inrupt.com/sdk/javascript-sdk/error-codes,
+  https://docs.inrupt.com/ess/services/identifiers
+auth_style:
+  scheme: Bearer JWT (Solid-OIDC access token or ESS Access Token), DPoP-bound where required
+  header: 'Authorization: Bearer <token>  or  Authorization: DPoP <token> with a DPoP: <proof> header'
+  token_ttl: ESS Access Token default 5 minutes
+  see: authentication/inrupt-authentication.yml
+idempotency:
+  header: null
+  supported: true
+  mechanism: http-preconditions
+  description: >-
+    Inrupt does not implement an Idempotency-Key header. Safe repetition on the Solid storage surface
+    is instead enforced with HTTP preconditions, which the client SDK sets for you: a create carries a
+    precondition that the resource must not already exist (violating it returns 412 Precondition
+    Failed), and an update carries the previous state as a changelog whose old values must still match
+    what is in the Pod (violating it returns 409 Conflict). The practical effect for an agent is the
+    same guarantee an Idempotency-Key gives - a repeated write cannot silently clobber a concurrent
+    one - but it is achieved by optimistic concurrency rather than by request replay, so a retry after
+    a network timeout is NOT automatically deduplicated and must be reconciled by re-fetching.
+  evidence:
+  - >-
+    412 Precondition Failed - "saveSolidDatasetAt attempts to create a new Resource at the specified
+    URL if the passed-in Resource has no URL identifying it. When creating a new Resource, the function
+    adds the precondition that the Resource must not already exist."
+    (https://docs.inrupt.com/sdk/javascript-sdk/error-codes)
+  - >-
+    409 Conflict - "a SolidDataset keeps a changelog that tracks both the old value and new values...
+    If the old value specified in the changelog does not correspond to the value currently in the Pod,
+    the save operation returns a 409 Conflict error."
+  retention: not applicable - no replay cache is maintained
+  gap: >-
+    On the Notification Delivery Service and Platform Management APIs there is no idempotency mechanism
+    at all: POST /subscriptions and POST /admin/provision are not documented as safely repeatable, and
+    neither accepts a client-supplied request key.
+pagination:
+  style: page-number
+  params:
+  - name: page
+    description: Page number; must be a positive integer.
+  - name: pageSize
+    description: Items per page; positive integer, maximum 100, default 10.
+  response_fields:
+  - items
+  link_headers:
+  - 'Link: <next-page-url>; rel="next"  (absent when there is no next page)'
+  - 'Link: <prev-page-url>; rel="prev"  (absent on the first page)'
+  applies_to:
+  - GET /subscriptions
+  - GET /system/subscriptions
+  - GET /subscriptions/{identifier}/delivery-failures
+  note: >-
+    The Search Service uses its own request-body paging rather than these query parameters
+    (https://docs.inrupt.com/ess/services/service-search/search-api).
+field_expansion:
+  supported: false
+  note: >-
+    No expand / fields / include parameters. On the Solid storage surface the equivalent capability is
+    Data Views - a Pod owner registers a GraphQL schema and query in /views/registry and binds it to a
+    source resource, so a projection of the data is served at its own URL. That is a server-side
+    materialized projection, not a per-request sparse-fieldset parameter.
+  docs: https://docs.inrupt.com/ess/services/service-pod-management/data-views-api
+metadata:
+  supported: true
+  mechanism: Application-Defined Metadata
+  docs: https://docs.inrupt.com/ess/administration/application-defined-metadata
+  note: >-
+    Applications may attach metadata that ESS propagates into audit events and logs, gated by
+    INRUPT_AUDIT_PRODUCER_REQUEST_METADATA_ALLOW / _DENY and the logging equivalents.
+request_id_tracing:
+  header: x-request-id
+  observed: >-
+    Live response from https://storage.inrupt.com/.well-known/solid on 2026-08-23 carried
+    x-request-id: 1262f4b7eb8de0ba925f011e61f84e01
+  opentelemetry: https://docs.inrupt.com/ess/reference/appendix-opentelemetry
+  metadata_propagation: >-
+    INRUPT_REQUEST_METADATA_PROPAGATOR_HEADER_ALLOW / _DENY / _OVERRIDE and
+    INRUPT_REQUEST_METADATA_REFLECTOR_HEADER_ALLOW / _DENY control which inbound headers are carried
+    across services and reflected back.
+versioning:
+  in_path: false
+  scheme: semver on the product, surfaced as info.version in the OpenAPI (2.7.1)
+  see: lifecycle/inrupt-lifecycle.yml
+error_envelope:
+  format: rfc9457
+  media_type: application/problem+json
+  fields: [type, title, status, detail, instance]
+  validation_extension: violations[] {field, in, message}
+  see: errors/inrupt-problem-types.yml
+rate_limit_signaling:
+  headers: none documented
+  status_on_exhaustion: not documented
+  see: rate-limits/inrupt-rate-limits.yml
+identifiers:
+  introduced: ESS 3.0
+  docs: https://docs.inrupt.com/ess/services/identifiers
+  forms:
+  - form: '{storage-id}/sc/{resource-id}'
+    name: canonical URI
+    note: >-
+      Permanent and globally unique. REQUIRED when issuing Access Grants and when creating notification
+      subscriptions, so that access survives a deployment domain change.
+  - form: '{storage-id}/sp/{resource-path}'
+    name: path URI
+    note: Human-meaningful path addressing; may change if the resource is moved.
+content_negotiation:
+  rdf_serializations: [text/turtle, application/ld+json]
+  binary: any content type (Pods store files as well as RDF)
+  note: >-
+    /.well-known/solid is served as text/turtle; /.well-known/vc-configuration as application/ld+json.
+reversibility:
+  applicable: true
+  grade: verified
+  summary: >-
+    Inrupt's write surface is unusually reversible because consent, not data, is the primary object:
+    an Access Grant can be revoked at any time by the issuer and takes effect immediately, and grants
+    additionally carry an expiry so access reverses itself even if nobody acts. Resource deletion,
+    however, is NOT reversible and Inrupt says so plainly.
+  operations:
+  - action: Grant access to a resource
+    reversal: Revoke the Access Grant
+    window: >-
+      Any time before expiry, with no time limit on the revocation itself. Revocation is recorded on
+      the Access Grant Service status endpoint (https://vc.{ess-domain}/status) and ESS checks grant
+      status server-side on every access as of ESS 3.0, so a revoked grant stops working on the next
+      request rather than at the next token refresh.
+    docs: https://docs.inrupt.com/ess/services/service-access-grant/service-access-grant-status
+    signal: >-
+      Subscribers receive an AccessGrantRevoked notification; an expiring grant produces
+      AccessGrantExpired.
+  - action: Request access to a resource
+    reversal: Cancel the Access Request
+    window: While status is pending; a cancelled request reports status "cancelled".
+    docs: https://docs.inrupt.com/ess/services/service-mcp/mcp-resource
+  - action: Create a notification subscription
+    reversal: DELETE /subscriptions/{identifier} (operationId removeSubscription)
+    window: Any time while the subscription exists; subscriptions also carry an expiration date-time.
+    docs: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+  - action: Provision a user account
+    reversal: DELETE /admin/provision/{accountId}
+    window: >-
+      Setup state ONLY. Once PUT /admin/provision/{accountId}/activate has run, ownership has
+      transferred to the end user and the deprovision endpoint no longer applies.
+    docs: https://docs.inrupt.com/ess/services/service-platform-management/platform-management-api
+  - action: Delete a Pod resource
+    reversal: none
+    window: null
+    note: >-
+      No undelete, restore or trash window is documented. Deletion is further constrained rather than
+      softened: a resource with existing direct Data Views returns 409 Conflict until the views are
+      removed first. Pruning of deleted resources is a scheduled administrative process
+      (https://docs.inrupt.com/ess/administration/resource-deletions), not a user-facing restore.
+  - action: Register a Data View definition
+    reversal: DELETE /views/registry/{id}
+    window: Any time, subject to registry authorization (ESS Administrators only).
+dry_run_mode:
+  supported: partial
+  evidence: >-
+    POST /views/bindings/preview previews the result of a View Binding before it is created. No
+    general-purpose dry-run or simulate flag exists across the other services.
+  docs: https://docs.inrupt.com/ess/services/service-pod-management/data-views-api

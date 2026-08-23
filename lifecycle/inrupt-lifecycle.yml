@@ -1,0 +1,118 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  https://www.inrupt.com/maintenance-policy, https://www.inrupt.com/support-policy,
+  https://docs.inrupt.com/support/supported-versions/ess, https://docs.inrupt.com/ess/releases,
+  https://status.inrupt.com/
+versioning:
+  scheme: semver
+  policy_url: https://www.inrupt.com/maintenance-policy
+  rules:
+  - Major releases (X.x.x) may contain backwards-incompatible changes.
+  - Minor releases (x.X.x) preserve full backwards compatibility within a major release.
+  - Patch releases (x.x.X) preserve full backwards compatibility within a major release.
+  api_versioning: >-
+    The published OpenAPI carries its own info.version (2.7.1 for Inrupt Change Notifications) which
+    tracks the ESS component, not a URL path version. Endpoints are unversioned in the path.
+support_phases:
+  policy_url: https://www.inrupt.com/maintenance-policy
+  phases:
+  - name: Developer Preview / Alpha / Beta
+    description: Not for production; breaking changes possible in future releases.
+  - name: General Availability
+    description: Supported for a minimum of 1 year from the GA release date.
+  - name: Deprecated
+    description: >-
+      Entered once a release is older than 6 months and is no longer the latest major or minor version.
+      Inrupt makes a public announcement. No new feature development on deprecated major versions.
+  - name: End of Life
+    description: No longer supported.
+supported_versions:
+  source: https://docs.inrupt.com/support/supported-versions/ess
+  product: Enterprise Solid Server
+  versions:
+  - version: 3.2.x
+    released: '2026-07-24'
+    phase: Full Support
+  - version: 3.1.x
+    released: '2026-06-29'
+    phase: Full Support
+  - version: 3.0.x
+    released: '2026-05-27'
+    phase: Full Support
+  - version: 2.7.x
+    released: '2026-01-13'
+    phase: Deprecated
+    eol: '2027-01-13'
+  - version: 2.6.x
+    released: '2025-09-30'
+    phase: Deprecated
+    eol: '2026-09-30'
+  - version: 2.5.x
+    released: '2025-06-26'
+    phase: End of Life
+    eol: '2026-06-26'
+  - version: 2.4.x
+    released: '2025-05-13'
+    phase: End of Life
+    eol: '2026-05-13'
+  - version: 2.3.x
+    released: '2024-12-12'
+    phase: End of Life
+    eol: '2025-12-12'
+  other_products_tracked:
+  - https://docs.inrupt.com/support/supported-versions/jcl
+  - https://docs.inrupt.com/support/supported-versions/js
+  - https://docs.inrupt.com/support/supported-versions/applications
+deprecation:
+  policy: true
+  policy_url: https://www.inrupt.com/maintenance-policy
+  sunset_header: false
+  deprecation_header: false
+  note: >-
+    Deprecation is announced publicly and expressed as a dated version table with EOL dates, which is
+    strong for an installed-software product. It is NOT expressed at runtime: no RFC 8594 Sunset or
+    Deprecation response headers are documented on any ESS endpoint, so a client cannot learn from a
+    response that the version it is calling is deprecated.
+  removed_surfaces:
+  - name: UMA Service
+    removed_in: ESS 3.0.0
+    replacement: Access Grants used directly as receipts, with no UMA negotiation.
+  - name: Query / QPF (Fragments) Service
+    removed_in: ESS 3.0.0
+    replacement: Search Service (added in ESS 3.2.0)
+  - name: Notification Gateway Service
+    removed_in: ESS 3.0.0
+    replacement: none
+  - name: WebSocket Notification Service
+    removed_in: ESS 3.0.0
+    replacement: Notification Delivery Service (webhooks)
+  - name: Wallet Service
+    removed_in: ESS 3.0.0
+    replacement: none; ESS 2.7 documentation retained for reference
+  - name: PodBrowser
+    removed_in: sunset announced at https://www.inrupt.com/blog/podbrowser-sunset
+    replacement: none
+support:
+  policy_url: https://www.inrupt.com/support-policy
+  severity_levels:
+  - level: 1
+    definition: >-
+      Production impact - software nonresponsive or seriously impaired, or production data lost or
+      destroyed, with no workaround. Root cause analysis report provided within 1 week of resolution.
+  - level: 2
+    definition: Software moderately impaired; system functioning in reduced capacity, no good workaround.
+  - level: 3
+    definition: Identified but does not prevent normal operation, or a workaround exists.
+  - level: 4
+    definition: Non-critical.
+  channel: https://inrupt.atlassian.net/servicedesk
+status_page:
+  url: https://status.inrupt.com/
+  platform: Atlassian Statuspage
+  verified: '2026-08-23'
+  http_status: 200
+deprecated_operations:
+  source: openapi/inrupt-notification-openapi.yaml
+  count: 0
+  note: 'No operation in the published OpenAPI carries deprecated: true.'

@@ -1,0 +1,63 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  https://docs.inrupt.com/podspaces/podspaces,
+  https://storage.inrupt.com/.well-known/solid (probed 2026-08-23),
+  https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service,
+  https://docs.inrupt.com/ess/reference/limit-and-thresholds
+docs: https://docs.inrupt.com/ess/reference/limit-and-thresholds
+limit_count: 5
+note: >-
+  Inrupt publishes no request-rate limits and no rate-limit response headers on any surface. What it
+  does publish are capacity and quota ceilings, several of which are deployment-configurable because
+  ESS is customer-operated software rather than a metered public API. The reference page nominally
+  reserved for this - https://docs.inrupt.com/ess/reference/limit-and-thresholds - is published with a
+  heading and no body (probed 2026-08-23, HTTP 200, 303 bytes).
+response_headers:
+  rate_limit_headers: none
+  retry_after: not documented
+  status_on_exhaustion: not documented
+  observed: >-
+    No X-RateLimit-*, RateLimit-* or Retry-After header was present on any unauthenticated response
+    observed on 2026-08-23 from storage.inrupt.com, login.inrupt.com, vc.inrupt.com or
+    notification.inrupt.com.
+limits:
+- name: Resource size
+  scope: per-resource
+  limit: 100 MB
+  surface: PodSpaces (hosted developer preview)
+  source: https://docs.inrupt.com/podspaces/podspaces
+- name: Pods per owner
+  scope: per-agent
+  limit: 10
+  surface: PodSpaces
+  source: >-
+    solid:maxPodsPerOwner "10"^^xsd:int in https://storage.inrupt.com/.well-known/solid, probed
+    2026-08-23
+  note: Advertised in the machine-readable discovery document, which is where an agent can actually read it.
+- name: Collection page size
+  scope: per-request
+  limit: 100
+  default: 10
+  surface: Notification Delivery Service subscription listings
+  source: openapi/inrupt-notification-openapi.yaml and the service reference
+- name: User subscriptions
+  scope: per-user
+  limit: deployment-configured
+  config: INRUPT_NOTIFICATION_SUBSCRIPTIONS_USER_MAX
+  surface: Notification Delivery Service
+  source: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+- name: System subscriptions
+  scope: per-deployment
+  limit: deployment-configured
+  config: INRUPT_NOTIFICATION_SUBSCRIPTIONS_SYSTEM_MAX
+  surface: Notification Delivery Service
+  source: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+related_thresholds:
+- name: Subscription purpose field
+  limit: 1024 characters
+- name: Webhook dispatch retry limit
+  config: INRUPT_NOTIFICATION_DISPATCH_RETRY_LIMIT
+  note: Bounds redelivery attempts to a failing webhook; exhausted attempts become delivery failures.
+- name: Failed delivery store size
+  config: INRUPT_NOTIFICATION_FAILED_DELIVERY_MAX_SIZE

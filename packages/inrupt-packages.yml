@@ -1,0 +1,156 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  registry.npmjs.org and search.maven.org registry metadata endpoints, cross-checked against
+  https://docs.inrupt.com/sdk/javascript-sdk/installation and https://docs.inrupt.com/sdk/java-sdk/installation
+  and the github.com/inrupt organization.
+note: >-
+  Inrupt ships two first-party SDK families: an npm-published TypeScript/JavaScript family under the
+  @inrupt scope, and a Maven Central family under the com.inrupt.client group. The JavaScript family is
+  actively released (most recent 2026-06). The Java family's newest published artifact on Maven Central
+  is 1.3.1, released 2025-01-14 — roughly nineteen months older than the JavaScript SDK and predating
+  ESS 3.0 (2026-05-27), ESS 3.1 and ESS 3.2, so a Java consumer's client library is older than the
+  server generation it would be talking to.
+packages:
+- language: javascript
+  registry: npm
+  name: '@inrupt/solid-client'
+  official: true
+  version: 3.0.0
+  published: '2025-11-04'
+  url: https://www.npmjs.com/package/@inrupt/solid-client
+  repository: https://github.com/inrupt/solid-client-js
+  description: Read and write data and manage permissions on data stored in Solid Pods.
+- language: javascript
+  registry: npm
+  name: '@inrupt/solid-client-authn-browser'
+  official: true
+  version: 5.0.0
+  published: '2026-06-03'
+  url: https://www.npmjs.com/package/@inrupt/solid-client-authn-browser
+  repository: https://github.com/inrupt/solid-client-authn-js
+  description: Browser-side Solid-OIDC authentication with DPoP-bound tokens.
+- language: javascript
+  registry: npm
+  name: '@inrupt/solid-client-authn-node'
+  official: true
+  version: 5.0.0
+  published: '2026-06-03'
+  url: https://www.npmjs.com/package/@inrupt/solid-client-authn-node
+  repository: https://github.com/inrupt/solid-client-authn-js
+  description: Server-side Solid-OIDC authentication for Node.js, including client credentials.
+- language: javascript
+  registry: npm
+  name: '@inrupt/solid-client-authn-core'
+  official: true
+  version: 5.0.0
+  published: '2026-06-03'
+  url: https://www.npmjs.com/package/@inrupt/solid-client-authn-core
+  repository: https://github.com/inrupt/solid-client-authn-js
+  description: Shared core for the browser and node authentication libraries.
+- language: javascript
+  registry: npm
+  name: '@inrupt/solid-client-access-grants'
+  official: true
+  version: 4.0.1
+  published: '2025-11-04'
+  url: https://www.npmjs.com/package/@inrupt/solid-client-access-grants
+  repository: https://github.com/inrupt/solid-client-access-grants-js
+  description: Create, approve, query and use Access Requests and Access Grants.
+- language: javascript
+  registry: npm
+  name: '@inrupt/solid-client-notifications'
+  official: true
+  version: 4.0.1
+  published: '2026-06-03'
+  url: https://www.npmjs.com/package/@inrupt/solid-client-notifications
+  repository: https://github.com/inrupt/solid-client-notifications-js
+  description: Receive notifications linked to Solid resources.
+- language: javascript
+  registry: npm
+  name: '@inrupt/solid-client-vc'
+  official: true
+  version: 2.0.1
+  published: '2025-12-10'
+  url: https://www.npmjs.com/package/@inrupt/solid-client-vc
+  repository: https://github.com/inrupt/solid-client-vc-js
+  description: Client for a server implementing the W3C VC HTTP API.
+- language: javascript
+  registry: npm
+  name: '@inrupt/solid-client-errors'
+  official: true
+  version: 0.0.4
+  published: '2026-06-16'
+  url: https://www.npmjs.com/package/@inrupt/solid-client-errors
+  repository: https://github.com/inrupt/solid-client-errors-js
+  description: RFC 9457 Problem Details handling library used across the Inrupt JS SDK.
+- language: javascript
+  registry: npm
+  name: '@inrupt/vocab-common-rdf'
+  official: true
+  version: 1.0.5
+  published: '2022-06-01'
+  url: https://www.npmjs.com/package/@inrupt/vocab-common-rdf
+  repository: https://github.com/inrupt/solid-common-vocab-rdf
+  description: Generated bundle of common RDF vocabularies (acl, dcterms, foaf, schema.org, vcard...).
+  note: Last published 2022-06-01; four years without a release.
+- language: javascript
+  registry: npm
+  name: '@inrupt/vocab-solid'
+  official: true
+  version: 1.0.4
+  published: '2022-06-01'
+  url: https://www.npmjs.com/package/@inrupt/vocab-solid
+  repository: https://github.com/inrupt/solid-common-vocab-rdf
+  description: Generated bundle of Solid-specific RDF vocabularies.
+  note: Last published 2022-06-01; four years without a release.
+- language: java
+  registry: maven
+  name: com.inrupt.client:inrupt-client-bom
+  official: true
+  version: 1.3.1
+  published: '2025-01-14'
+  url: https://central.sonatype.com/artifact/com.inrupt.client/inrupt-client-bom
+  repository: https://github.com/inrupt/solid-client-java
+  description: >-
+    Bill of materials for the Inrupt Java Client Libraries. The family publishes 26 artifacts on Maven
+    Central under com.inrupt.client, all at 1.3.1 as of this probe: inrupt-client, -api, -core,
+    -runtime, -solid, -webid, -accessgrant, -openid, -uma, -vocabulary, -parser, -jackson, -jsonb,
+    -jena, -rdf4j, -rdf-legacy, -httpclient, -okhttp, -caffeine, -guava, -spring, -quarkus, -test,
+    -bom, and the two archetypes.
+- language: java
+  registry: maven
+  name: com.inrupt.client:inrupt-client-solid
+  official: true
+  version: 1.3.1
+  published: '2025-01-14'
+  url: https://central.sonatype.com/artifact/com.inrupt.client/inrupt-client-solid
+  repository: https://github.com/inrupt/solid-client-java
+  description: Solid Protocol client (CRUD on Pod resources, RDF wrapping) for Java.
+- language: java
+  registry: maven
+  name: com.inrupt.client:inrupt-client-accessgrant
+  official: true
+  version: 1.3.1
+  published: '2025-01-14'
+  url: https://central.sonatype.com/artifact/com.inrupt.client/inrupt-client-accessgrant
+  repository: https://github.com/inrupt/solid-client-java
+  description: Access Request and Access Grant management for Java.
+- language: java
+  registry: maven
+  name: com.inrupt.client:inrupt-client-openid
+  official: true
+  version: 1.3.1
+  published: '2025-01-14'
+  url: https://central.sonatype.com/artifact/com.inrupt.client/inrupt-client-openid
+  repository: https://github.com/inrupt/solid-client-java
+  description: OpenID Connect / Solid-OIDC session handling for Java.
+absent_registries:
+- registry: pypi
+  note: No first-party Inrupt Python client library found on PyPI.
+- registry: nuget
+  note: No first-party Inrupt .NET client library found on NuGet.
+- registry: pkg.go.dev
+  note: No first-party Inrupt Go client library found.
+- registry: rubygems
+  note: No first-party Inrupt Ruby client library found.

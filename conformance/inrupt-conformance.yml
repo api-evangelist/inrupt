@@ -1,0 +1,158 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  https://docs.inrupt.com/ess/services/appendix/discovery-endpoint,
+  https://login.inrupt.com/.well-known/openid-configuration,
+  https://vc.inrupt.com/.well-known/vc-configuration,
+  https://notification.inrupt.com/openapi.yaml,
+  https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service,
+  https://docs.inrupt.com/security/authorization/acp,
+  https://www.inrupt.com/blog/inrupt-earns-iso-27001-2022-certification-for-solid-services,
+  https://www.inrupt.com/trust
+standards:
+- id: oidc
+  name: OpenID Connect Discovery 1.0
+  conforms: true
+  evidence: >-
+    https://login.inrupt.com/.well-known/openid-configuration returns HTTP 200 with issuer,
+    authorization_endpoint, token_endpoint, userinfo_endpoint, jwks_uri, registration_endpoint,
+    revocation_endpoint, end_session_endpoint, claims_supported and code_challenge_methods_supported.
+- id: oauth2
+  name: OAuth 2.0 (authorization_code, refresh_token, client_credentials) with PKCE
+  conforms: true
+  evidence: >-
+    grant_types_supported = [authorization_code, refresh_token, client_credentials];
+    code_challenge_methods_supported = [plain, S256] in the discovery document at login.inrupt.com.
+- id: rfc8693
+  name: OAuth 2.0 Token Exchange
+  conforms: true
+  evidence: >-
+    ESS Platform Management publishes POST /access/token with
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange and
+    subject_token_type=urn:ietf:params:oauth:token-type:id_token
+    (https://docs.inrupt.com/ess/services/service-platform-management/token-exchange).
+- id: dpop
+  name: OAuth 2.0 Demonstrating Proof of Possession (RFC 9449)
+  conforms: true
+  evidence: >-
+    dpop_signing_alg_values_supported = [RS256, ES256] in the login.inrupt.com discovery document;
+    the ESS Data Views examples show Authorization: DPoP <token> with a DPoP: <proof> header.
+- id: solid-oidc
+  name: Solid-OIDC
+  conforms: true
+  evidence: >-
+    scopes_supported includes "webid" and claims_supported includes "webid" at login.inrupt.com; ESS
+    ships a dedicated Solid OIDC Broker Service for deployments requiring Solid-OIDC protocol
+    compliance (https://docs.inrupt.com/ess/services/advanced-configuration/service-oidc).
+- id: rfc9457
+  name: RFC 9457 Problem Details for HTTP APIs
+  conforms: true
+  evidence: >-
+    The published OpenAPI declares components.schemas.HttpProblem as "HTTP Problem Response according
+    to RFC9457 and RFC7807" with type/title/status/detail/instance, plus HttpValidationProblem adding
+    violations[]. Live 404s from notification.inrupt.com and platform.inrupt.com return
+    Content-Type: application/problem+json. Inrupt also publishes @inrupt/solid-client-errors, "An
+    RFC9457 Problem Details handling library".
+- id: rfc9421
+  name: RFC 9421 HTTP Message Signatures
+  conforms: true
+  evidence: >-
+    "All messages sent by the Notification Delivery Service will be signed according to RFC 9421 HTTP
+    Message Signatures"; verification keys are published at /jwks as a JWK Set with kid and x5c.
+- id: rfc8615
+  name: RFC 8615 Well-Known URIs
+  conforms: true
+  evidence: >-
+    ESS documents /.well-known/openid-configuration, /.well-known/solid and /.well-known/vc-configuration
+    and cites RFC 8615 explicitly at
+    https://docs.inrupt.com/ess/services/appendix/discovery-endpoint. All three return 200 on the
+    hosted PodSpaces deployment.
+- id: pagination
+  name: Cursor-free paged collections with RFC 8288 Link relations
+  conforms: true
+  evidence: >-
+    GET /subscriptions accepts page and pageSize (max 100, default 10) and returns
+    Link: <next-page-url>; rel="next" and Link: <prev-page-url>; rel="prev" headers.
+- id: idempotency
+  name: Idempotency-Key header
+  conforms: false
+  evidence: >-
+    No Idempotency-Key header or equivalent appears in the published OpenAPI, in the ESS service
+    reference, or in the SDK documentation. Safe repetition is instead achieved through HTTP
+    preconditions on the Solid storage surface (see conventions/inrupt-conventions.yml).
+- id: openapi
+  name: OpenAPI 3.1.0
+  conforms: true
+  evidence: >-
+    https://notification.inrupt.com/openapi.yaml declares openapi 3.1.0, info.title "Inrupt Change
+    Notifications", version 2.7.1, 14 operations with unique operationIds, tags and typed responses.
+    Coverage is partial: only the Notification Delivery Service publishes an OpenAPI; the Access Grant,
+    Pod Storage, Platform Management and Search services do not.
+- id: asyncapi
+  name: AsyncAPI
+  conforms: false
+  evidence: >-
+    An event surface with eleven documented notification types exists, but no AsyncAPI document is
+    published on any Inrupt host.
+- id: iso27001
+  name: ISO/IEC 27001:2022
+  conforms: true
+  evidence: >-
+    Inrupt announced ISO 27001:2022 certification for its Solid services using the Enterprise Solid
+    Server on 2024-09-10
+    (https://www.inrupt.com/blog/inrupt-earns-iso-27001-2022-certification-for-solid-services). No
+    certificate number or auditor is published on the Trust page.
+- id: gdpr
+  name: EU GDPR
+  conforms: true
+  evidence: >-
+    https://www.inrupt.com/trust states the product is designed for compliance with data transfer and
+    localization requirements and names GDPR and CCPA in its Regulations and Compliance section. This
+    is a vendor statement of design intent, not an audited attestation.
+- id: soc2
+  name: SOC 2
+  conforms: false
+  evidence: >-
+    No SOC 2 report, bridge letter or trust-center attestation was found on inrupt.com as of
+    2026-08-23.
+domain_standards:
+- id: solid-protocol
+  name: Solid Protocol (W3C Solid Community Group / W3C Solid Working Group)
+  conforms: true
+  contract_evidence: >-
+    https://storage.inrupt.com/.well-known/solid returns HTTP 200, Content-Type text/turtle, carrying
+    a solid:DiscoveryDocument with solid:maxPodsPerOwner, solid:notificationGateway, solid:provision
+    and solid:qpf predicates in the http://www.w3.org/ns/solid/terms# namespace. This is the contract
+    declaring the standard, not a marketing claim: an agent that already speaks Solid can discover the
+    Pod surface with no bespoke connector.
+  note: >-
+    Inrupt's entire product is a Solid implementation; Solid is the domain standard for personal data
+    stores and its author, Sir Tim Berners-Lee, co-founded Inrupt.
+- id: w3c-vc
+  name: W3C Verifiable Credentials and the VC HTTP API
+  conforms: true
+  contract_evidence: >-
+    https://vc.inrupt.com/.well-known/vc-configuration returns HTTP 200 with @context
+    ["https://www.w3.org/2018/credentials/v1", "https://schema.inrupt.com/credentials/v2.jsonld"], the
+    issuerService / statusService / verifierService / derivationService / queryService endpoint map,
+    and supportedSignatureTypes ["https://w3id.org/security#Ed25519Signature2020"]. Access Requests
+    and Access Grants are themselves Verifiable Credentials.
+- id: acp
+  name: Access Control Policy (ACP)
+  conforms: true
+  contract_evidence: >-
+    ESS implements ACP as its authorization model, documented at
+    https://docs.inrupt.com/security/authorization/acp; Access Control Resources are served alongside
+    Pod resources and the trusted-app allow list is advertised in the /.well-known/solid document.
+- id: rdf
+  name: RDF 1.1 / Turtle / JSON-LD
+  conforms: true
+  contract_evidence: >-
+    Pod resources are RDF; the Solid discovery document is served as text/turtle and the VC
+    configuration as application/ld+json with a JSON-LD @context.
+- id: activitystreams
+  name: W3C Activity Streams 2.0 notification vocabulary
+  conforms: false
+  contract_evidence: >-
+    ESS notification types (ResourceCreated, AccessGrantIssued, ...) are Inrupt-defined strings rather
+    than Activity Streams activity types, unlike the Solid Notifications Protocol's AS2 profile.

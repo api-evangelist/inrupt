@@ -1,0 +1,109 @@
+generated: '2026-08-23'
+method: derived
+source: >-
+  mcp/inrupt-mcp.yml (from https://docs.inrupt.com/ess/services/service-mcp/mcp-resource) bound against
+  openapi/inrupt-notification-openapi.yaml (https://notification.inrupt.com/openapi.yaml).
+summary: >-
+  Inrupt's MCP surface and Inrupt's published OpenAPI surface do not overlap at all. The only OpenAPI
+  document Inrupt serves describes the Notification Delivery Service (subscriptions and webhooks); the
+  MCP Resource Service exposes access-request and resource-read tools whose backing REST services — the
+  Access Grant Service (/issue, /query, /status, /verify, /derive) and the Pod Storage Service — are
+  documented in prose and RDF discovery documents but publish no OpenAPI. So every MCP tool is
+  mcp_only against the available contract, and every OpenAPI operation is rest_only. That is the real
+  measurement, not a mapping failure: an agent that reads Inrupt's OpenAPI learns nothing about how to
+  request consent, and an agent that uses the MCP tools cannot subscribe to the events that tell it
+  when consent arrived.
+surfaces:
+  openapi:
+    file: openapi/inrupt-notification-openapi.yaml
+    title: Inrupt Change Notifications
+    version: 2.7.1
+    served_at: https://notification.inrupt.com/openapi.yaml
+    gated: false
+    operations: 14
+  mcp:
+    url: https://mcp.{ess-domain}/api
+    gated: true
+    gating_note: >-
+      Requires an ESS Access Token from token exchange; no public ESS deployment exposes the MCP
+      endpoint, so tools/list could not be introspected anonymously.
+    tools: 4
+  graphql:
+    endpoint: null
+    note: >-
+      ESS has a GraphQL surface only in the sense that Data Views are defined with GraphQL schemas and
+      queries registered by the Pod owner (POST /views/registry). There is no provider-operated GraphQL
+      endpoint to introspect.
+crosswalk: []
+mcp_only:
+- tool: requestAccess
+  reason: >-
+    Backed by the Access Grant Service issuer endpoint (POST /issue on vc.{ess-domain}), which is
+    documented in prose at https://docs.inrupt.com/ess/services/service-access-grant/issue-endpoint but
+    has no published OpenAPI operationId to bind to.
+- tool: checkAccessRequestStatus
+  reason: >-
+    Backed by the Access Grant Service status/query endpoints (/status, /query on vc.{ess-domain});
+    no published OpenAPI operationId.
+- tool: hasMatchingAccessGrant
+  reason: >-
+    Backed by the Access Grant Service query endpoint (POST /query on vc.{ess-domain}); no published
+    OpenAPI operationId.
+- tool: getResource
+  reason: >-
+    Backed by a Solid Protocol GET against the Pod Storage Service. The Solid Protocol is specified by
+    the W3C Solid Community Group rather than by an Inrupt OpenAPI, so there is no operationId.
+rest_only:
+- operationId: negotiate
+  path: POST /
+  reason: Notification protocol negotiation; no MCP tool exposes it.
+- operationId: getJsonWebKeySet
+  path: GET /jwks
+  reason: Webhook signature verification keys; no MCP tool exposes it.
+- operationId: listSubscriptions
+  path: GET /subscriptions
+  reason: No MCP tool subscribes to or lists change notifications.
+- operationId: createSubscription
+  path: POST /subscriptions
+  reason: >-
+    The most consequential gap. An agent that has just called requestAccess must poll
+    checkAccessRequestStatus, because it has no MCP tool for creating the AccessGrantIssued
+    subscription that would tell it the moment consent was granted.
+- operationId: fetchSubscription
+  path: GET /subscriptions/{identifier}
+  reason: No MCP tool exposes it.
+- operationId: removeSubscription
+  path: DELETE /subscriptions/{identifier}
+  reason: No MCP tool exposes it.
+- operationId: listDeliveryFailures
+  path: GET /subscriptions/{identifier}/delivery-failures
+  reason: No MCP tool exposes it.
+- operationId: listSystemSubscriptions
+  path: GET /system/subscriptions
+  reason: System-manager scope; no MCP tool exposes it.
+- operationId: createSystemSubscription
+  path: POST /system/subscriptions
+  reason: System-manager scope; no MCP tool exposes it.
+- operationId: fetchSystemSubscription
+  path: GET /system/subscriptions/{identifier}
+  reason: System-manager scope; no MCP tool exposes it.
+- operationId: removeSystemSubscription
+  path: DELETE /system/subscriptions/{identifier}
+  reason: System-manager scope; no MCP tool exposes it.
+- operationId: listSystemDeliveryFailures
+  path: GET /system/subscriptions/{identifier}/delivery-failures
+  reason: System-manager scope; no MCP tool exposes it.
+- operationId: reprocessSystemSubscription
+  path: POST /system/subscriptions/{subscription}/delivery-failures/reprocess
+  reason: System-manager scope; no MCP tool exposes it.
+- operationId: fetchSystemSubscriptionReprocessStatus
+  path: GET /system/subscriptions/{subscription}/delivery-failures/reprocess/{identifier}
+  reason: System-manager scope; no MCP tool exposes it.
+coverage:
+  mcp_tools: 4
+  mcp_tools_bound_to_rest: 0
+  mcp_only: 4
+  rest_operations: 14
+  rest_operations_bound_to_tools: 0
+  rest_only: 14
+  overlap_percent: 0

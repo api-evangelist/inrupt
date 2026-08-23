@@ -1,0 +1,26 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  https://www.inrupt.com/ (site navigation and sitemap.xml, probed 2026-08-23),
+  https://www.inrupt.com/contact, https://docs.inrupt.com/podspaces/podspaces
+plan_count: 0
+pricing_published: false
+note: >-
+  Inrupt publishes no pricing. https://www.inrupt.com/pricing returns 404 and no pricing or plans page
+  appears anywhere in https://www.inrupt.com/sitemap.xml (probed 2026-08-23). The Enterprise Solid
+  Server is sold as licensed, customer-deployed enterprise software through a sales motion - the site's
+  calls to action are "Contact Us", "Book a demo" and the design-partner programme. The one surface a
+  developer can reach without a contract is PodSpaces, a free hosted developer preview with published
+  capacity limits (see rate-limits/inrupt-rate-limits.yml) and an explicit warning not to use it for
+  production or sensitive data.
+evidence:
+- url: https://www.inrupt.com/pricing
+  status: 404
+- url: https://www.inrupt.com/sitemap.xml
+  status: 200
+  finding: No /pricing or /plans URL present among the site's published URLs.
+- url: https://start.inrupt.com/
+  status: 200
+  finding: Free self-service PodSpaces sign-up; no plan tiers, no billing.
+contact_sales: https://www.inrupt.com/contact
+plans: []

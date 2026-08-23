@@ -1,0 +1,38 @@
+generated: '2026-08-23'
+method: searched
+source: https://www.inrupt.com/trust and https://www.inrupt.com/blog/inrupt-earns-iso-27001-2022-certification-for-solid-services
+url: https://www.inrupt.com/trust
+http_status: 200
+name: Inrupt Trust
+type: trust-page
+note: >-
+  Inrupt publishes a Trust page describing its Trust-by-Design, Privacy-by-Design and Security-by-Design
+  posture and its SDLC security practices (threat modelling, SAST and DAST, penetration tests, secure
+  configuration, continuous monitoring). It is a narrative page, not a document portal: there is no
+  self-serve download of a certificate, SOC 2 report, penetration-test summary or subprocessor list,
+  and no automated trust-center platform (Vanta / Drata / SafeBase) behind it.
+certifications:
+- name: ISO/IEC 27001:2022
+  scope: Inrupt's Solid services using the Enterprise Solid Server (ESS)
+  announced: '2024-09-10'
+  source: https://www.inrupt.com/blog/inrupt-earns-iso-27001-2022-certification-for-solid-services
+  certificate_published: false
+  note: Announced in a first-party post; no certificate number or certification body is published.
+regulatory_alignment:
+- name: GDPR
+  claim: design alignment
+  source: https://www.inrupt.com/trust
+- name: CCPA
+  claim: design alignment
+  source: https://www.inrupt.com/trust
+not_found:
+- SOC 2 Type I or II report or bridge letter
+- PCI DSS
+- HIPAA attestation
+- FedRAMP authorization
+- Public subprocessor list
+- Public penetration test summary
+related:
+  security_program: https://www.inrupt.com/security
+  advisories: https://www.inrupt.com/security/advisories
+  security_docs: https://docs.inrupt.com/security/security-checklist

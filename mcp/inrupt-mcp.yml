@@ -1,0 +1,133 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  https://docs.inrupt.com/ess/services/service-mcp and
+  https://docs.inrupt.com/ess/services/service-mcp/mcp-resource and
+  https://docs.inrupt.com/guides/integrating-with-ess-mcp
+name: Inrupt ESS MCP Resource Service
+status: published
+introduced: ESS 3.0.0 (released 2026-05-27)
+description: >-
+  Inrupt ships a first-party MCP server as an ESS service. The MCP Resource Service exposes four tools
+  that let an AI agent ask a person for consent to their Pod data, watch for the approval, verify the
+  resulting Access Grant, and then read the granted resource. Every call is scoped to the authenticated
+  delegator, so the agent can never exceed the rights of the user it is acting for. Approving an Access
+  Request is deliberately NOT an MCP tool — the human must approve it in a separate interface.
+deployment:
+  mode: remote
+  endpoint: https://mcp.{ess-domain}/api
+  transport: streamable-http
+  auth: oauth
+  verified: searched
+  note: >-
+    The endpoint is remote (an MCP client POSTs to it over streamable HTTP), but it is per-deployment
+    rather than a single Inrupt-hosted URL: ESS is customer-deployed, and the service's own
+    INRUPT_MCP_RESOURCE_HTTP_BASE_URL configures the host. Inrupt's docs give the default as
+    https://mcp.<ESS Domain>/api. Probed 2026-08-23: mcp.inrupt.com does not resolve, so the hosted
+    PodSpaces developer preview does not expose the MCP service publicly and there is no anonymous
+    tools/list to introspect. No npx/stdio package is published, so mode is remote, not both.
+authentication:
+  scheme: Bearer
+  token: ESS Access Token
+  obtained_via: >-
+    OAuth 2.0 Token Exchange (RFC 8693) against the Platform Management service:
+    POST https://platform.{ess-domain}/access/token with
+    grant_type=urn:ietf:params:oauth:grant-type:token-exchange,
+    subject_token=<external IdP id_token>,
+    subject_token_type=urn:ietf:params:oauth:token-type:id_token
+  token_ttl: 5 minutes (default); re-exchange on expires_in, handle 401 by re-exchanging and retrying
+  docs: https://docs.inrupt.com/ess/services/service-platform-management/token-exchange
+tools:
+- name: requestAccess
+  category: access-management
+  description: >-
+    Create a new Access Request for one or more resources, stored as a Verifiable Credential and
+    reviewable by the Resource Owner. Returns the Access Request URL with status pending.
+  parameters:
+  - name: resource
+    type: string
+    required: true
+    description: URL of the target resource to request access to.
+  - name: permission
+    type: string
+    required: true
+    description: Access modes requested; only "read" is currently supported.
+  - name: dataSubject
+    type: string
+    required: true
+    description: WebID of the Resource Owner.
+  - name: purpose
+    type: string
+    required: true
+    description: Purpose or reason for the Access Request.
+  constraints:
+  - The Access Request is automatically attributed to the authenticated user, preventing an agent from
+    spoofing identity to request another user's resources.
+- name: checkAccessRequestStatus
+  category: access-management
+  description: >-
+    Check the current status of a previously created Access Request. Returns one of pending, granted,
+    denied or cancelled.
+  parameters:
+  - name: accessRequestUrl
+    type: string
+    required: true
+    description: URL of the Access Request to check.
+  constraints:
+  - Only Access Requests issued to the current authenticated user can be checked; others fail with an
+    authorization error.
+- name: hasMatchingAccessGrant
+  category: access-management
+  description: >-
+    Verify whether a valid (active, non-revoked, non-expired) Access Grant exists for a resource with
+    the required access modes. Returns the Access Grant URL when one matches.
+  parameters:
+  - name: resourceUrl
+    type: string
+    required: true
+    description: URL of the target resource to check.
+  - name: purposeUrl
+    type: string
+    required: false
+    description: URL of the purpose.
+  - name: mode
+    type: string
+    required: true
+    description: Access modes to verify; only "read" is currently supported.
+  - name: dataSubject
+    type: string
+    required: true
+    description: WebID of the agent who should have issued the Access Grant.
+  - name: status
+    type: string
+    required: false
+    description: Access Grant status - active, revoked or expired. Defaults to active.
+  constraints:
+  - Only grants where the grantee is the current authenticated user can be checked.
+- name: getResource
+  category: resource-management
+  description: Retrieve the content of a resource using a valid Access Grant.
+  parameters:
+  - name: resourceUrl
+    type: string
+    required: true
+    description: URL of the resource to retrieve.
+  - name: accessGrantUrl
+    type: string
+    required: true
+    description: URL of the Access Grant authorizing access.
+  constraints:
+  - The grant must exist, not be revoked, not be expired, cover the requested resource, have been
+    issued to the agent, and include the required access modes.
+  - The service validates that the grant's isProvidedTo field matches the agent's identity.
+human_in_the_loop:
+  approval_out_of_band: true
+  note: >-
+    "Reviewing and approving Access Requests cannot be done via the MCP service." The end user approves
+    in a separate access-management interface, which is the point of the design: the agent may ask, but
+    only the person may consent.
+schema_provenance: >-
+  Tool names, parameter names, types, requiredness and access-control constraints are transcribed
+  from Inrupt's published MCP Resource Service reference tables. No live tools/list introspection was
+  possible because there is no publicly reachable ESS MCP endpoint; the JSON Schema shapes an MCP
+  client would receive were not fabricated here.

@@ -1,0 +1,33 @@
+generated: '2026-08-23'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: www.inrupt.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct 14 11:45:26 2026 GMT
+  hsts: true
+  hsts_max_age: 31536000
+- host: docs.inrupt.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov  5 06:15:15 2026 GMT
+  hsts: true
+  hsts_max_age: 31536000
+- host: notification.inrupt.com
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Nov  3 03:09:40 2026 GMT
+  hsts: true
+  hsts_max_age: 31536000
+domains:
+- domain: inrupt.com
+  dnssec: true
+  caa:
+  - 0 issue "letsencrypt.org"
+  - 0 issue "amazontrust.com"
+  - 0 issue "pki.goog; cansignhttpexchanges=yes"
+  - 0 issue "digicert.com"
+  spf: true
+  dmarc: true
+  dmarc_policy: quarantine

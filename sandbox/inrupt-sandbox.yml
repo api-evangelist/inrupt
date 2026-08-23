@@ -1,0 +1,57 @@
+generated: '2026-08-23'
+method: searched
+source: >-
+  https://docs.inrupt.com/podspaces/podspaces, https://start.inrupt.com/,
+  https://docs.inrupt.com/podspaces/podspaces/getting-started,
+  https://docs.inrupt.com/guides/integrating-with-ess-mcp
+name: Inrupt PodSpaces (Developer Preview)
+type: hosted-developer-environment
+url: https://start.inrupt.com/
+status: developer-preview
+warning: >-
+  Inrupt's own words: "PodSpaces and PodSpaces AP are currently available as Developer Preview. Do not
+  use for production or for storing sensitive/personal data."
+description: >-
+  PodSpaces is Inrupt's hosted deployment of the Enterprise Solid Server. It is the only way to get a
+  working Pod and a real WebID against Inrupt-operated infrastructure without a commercial ESS
+  deployment, and it is what the SDK tutorials are written against. There is no separate test-mode key
+  prefix or sandbox/live switch: PodSpaces IS the non-production environment, and a production ESS is a
+  different deployment on a different domain.
+regions:
+- name: PodSpaces
+  signup: https://start.inrupt.com/
+  webid_form: https://id.inrupt.com/{username}
+  identity_provider: https://login.inrupt.com
+  pod_storage: https://storage.inrupt.com/{pod-identifier}
+  getting_started: https://docs.inrupt.com/podspaces/podspaces/getting-started
+- name: PodSpaces AP (Asia-Pacific)
+  signup: https://start.ap.inrupt.com
+  webid_form: https://id.inrupt.com/{username}
+  identity_provider: https://login.inrupt.com
+  pod_storage: https://storage.ap.inrupt.com/{pod-identifier}
+  getting_started: https://docs.inrupt.com/podspaces/podspaces/getting-started-ap
+limits:
+- 100 MB per stored resource
+- 10 Pods per owner (advertised as solid:maxPodsPerOwner in /.well-known/solid)
+access_control:
+- Access Control Policies (ACP)
+- Access Requests and Grants
+test_tooling:
+- name: MCP Inspector quickstart
+  description: >-
+    Inrupt documents connecting the MCP Inspector to an ESS MCP endpoint with a streamable-http
+    mcp.json config and a manually pasted Bearer ESS Access Token, as the recommended way to exercise
+    the tools before writing a client.
+  command: npx @modelcontextprotocol/inspector --config mcp.json --server ess
+  docs: https://docs.inrupt.com/guides/integrating-with-ess-mcp
+- name: Solid conformance / interoperability test suites
+  description: >-
+    Inrupt has published work on a Solid conformance test suite and interoperability tests for Solid
+    developers.
+  docs: https://www.inrupt.com/blog/conformance-test-suite
+test_credentials:
+  published: false
+  note: >-
+    No test API keys, magic identifiers, fixture accounts or seeded data are published. A developer
+    creates a real WebID and a real Pod on PodSpaces; the data is their own.
+support: https://inrupt.atlassian.net/servicedesk

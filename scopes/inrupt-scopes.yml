@@ -1,0 +1,55 @@
+generated: '2026-08-23'
+method: probed
+source: https://login.inrupt.com/.well-known/openid-configuration
+docs: https://docs.inrupt.com/guides/authentication-in-solid
+issuer: https://login.inrupt.com
+note: >-
+  Inrupt's Solid OpenID Provider advertises three scopes and no resource-level permission scopes.
+  This is by design and is the most important thing to understand about authorizing against ESS:
+  authorization is NOT carried in the OAuth scope. A token grants an identity (the WebID); what that
+  identity may read or write is decided separately by Access Control Policies on the resource and by
+  Access Grants, which are W3C Verifiable Credentials issued by the data subject. There is therefore
+  no scope reference page to enumerate, and the absence of granular scopes is not a documentation gap.
+scopes:
+- name: openid
+  description: Standard OpenID Connect scope requesting an ID token.
+  required: true
+- name: offline_access
+  description: Requests a refresh token so a session can be restored without re-authenticating.
+- name: webid
+  description: >-
+    Solid-OIDC scope requesting the webid claim, which binds the token to the user's WebID URI. Present
+    in both scopes_supported and claims_supported.
+authorization_model:
+  identity_scopes: OAuth/OIDC scopes above
+  resource_authorization:
+  - mechanism: Access Control Policy (ACP)
+    docs: https://docs.inrupt.com/security/authorization/acp
+    description: Policies on the Access Control Resource attached to each Pod resource.
+  - mechanism: Access Requests and Access Grants
+    docs: https://docs.inrupt.com/security/authorization/access-requests-grants
+    description: >-
+      Verifiable Credentials issued by the data subject naming grantee, resource, access modes and
+      purpose, with expiry and revocation. As of ESS 3.0 a grant acts as a receipt checked server-side.
+  access_modes:
+  - read
+  - write
+  - append
+  - control
+  mcp_restriction: >-
+    The MCP Resource Service currently supports only the read access mode for requestAccess and
+    hasMatchingAccessGrant.
+token_endpoint_auth_methods:
+- client_secret_basic
+- client_secret_post
+grant_types:
+- authorization_code
+- refresh_token
+- client_credentials
+pkce:
+- plain
+- S256
+dpop_signing_algs:
+- RS256
+- ES256
+dynamic_client_registration: https://login.inrupt.com/registration

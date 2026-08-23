@@ -1,0 +1,100 @@
+generated: '2026-08-23'
+method: searched
+source: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+type: Webhooks
+asyncapi_published: false
+asyncapi_note: >-
+  Inrupt publishes no AsyncAPI document. The event surface is real and fully documented, and the
+  subscription-management side of it carries an OpenAPI 3.1.0 contract
+  (openapi/inrupt-notification-openapi.yaml), but the delivered message itself is described only in
+  prose plus the NotificationContent schema inside that same OpenAPI. This catalog records the webhook
+  surface; it is not a generated AsyncAPI and must not be read as one.
+service:
+  name: ESS Notification Delivery Service
+  introduced: ESS 2.4
+  base_url: https://notification.{ess-domain}
+  hosted_instance: https://notification.inrupt.com
+  delivery: HTTP POST of a JSON payload to a subscriber-supplied HTTPS webhook URL
+  removed_transports:
+  - name: WebSocket Notification Service
+    removed_in: ESS 3.0
+    replacement: Notification Delivery Service
+  - name: Notification Gateway Service
+    removed_in: ESS 3.0
+event_types:
+- name: AccessRequestPending
+  description: An agent has created an Access Request and is awaiting a response.
+- name: AccessRequestDenied
+  description: An Access Request was denied.
+- name: AccessGrantIssued
+  description: An Access Grant was issued and is now available for use.
+- name: AccessGrantRevoked
+  description: An Access Grant was revoked and is no longer available for use.
+- name: AccessGrantExpired
+  description: An Access Grant has expired.
+- name: ResourceCreated
+  description: A resource was created.
+- name: ResourceUpdated
+  description: A resource was modified.
+- name: ResourceDeleted
+  description: A resource was deleted.
+- name: ContainerCreated
+  description: A container was created.
+- name: ContainerUpdated
+  description: A container was modified.
+- name: ContainerDeleted
+  description: A container was deleted.
+payload:
+  schema: NotificationContent (openapi/inrupt-notification-openapi.yaml components.schemas)
+  content_type: application/json
+  fields:
+  - name: id
+    description: Uniquely identifies the notification event (UUID).
+  - name: subscription
+    description: UUID of the subscription that produced the notification.
+  - name: published
+    description: ISO-8601 timestamp of notification creation.
+  - name: type
+    description: One of the supported event types above.
+  - name: purpose
+    description: Optional; the subscription purpose, max 1024 characters.
+  - name: controller
+    description: Controller of the changed resource (creator of the Access Request or Grant).
+  - name: audience
+    description: The agent the notification is directed to.
+  - name: resource
+    description: The resource associated with the notification.
+  - name: dataMinimization
+    description: >-
+      Optional; carries retentionPeriod as an ISO-8601 duration (e.g. P30D, PT2H30M) stating how long a
+      processing system may retain the data in this message. This is a consent constraint travelling
+      with the event, not a delivery hint.
+verification:
+  signature:
+    standard: RFC 9421 HTTP Message Signatures
+    keys: GET https://notification.{ess-domain}/jwks (JSON Web Key Set, kid-identified, x5c chain)
+    requirement: Receiving webhooks must verify the signature before processing the notification.
+  mtls:
+    supported: true
+    configured_via: subscription dispatch.authentication with a PEM X.509 serverCertificate
+subscription_management:
+  user_scope:
+    path_prefix: /subscriptions
+    auth: valid Solid OIDC / ESS access token
+    note: Notifications are delivered only where the subscribing agent is authorized on the resource.
+  system_scope:
+    path_prefix: /system/subscriptions
+    auth: system managers on a configured allow-list
+    note: >-
+      Broader scope for processing whose legal basis is contract - e.g. notify an endpoint about every
+      Access Grant created in the system.
+  hierarchical_matching:
+    introduced: ESS 2.5
+    description: >-
+      Subscribing to a container URI (trailing slash) also delivers events for resources within it,
+      with a documented matrix of which action produces which resource-level and container-level event.
+  delivery_failures:
+    listed_at: GET /subscriptions/{identifier}/delivery-failures
+    reprocess: POST /system/subscriptions/{subscription}/delivery-failures/reprocess (system scope)
+    retry_limit_config: INRUPT_NOTIFICATION_DISPATCH_RETRY_LIMIT
+    failed_delivery_store_config: INRUPT_NOTIFICATION_FAILED_DELIVERY_MAX_SIZE

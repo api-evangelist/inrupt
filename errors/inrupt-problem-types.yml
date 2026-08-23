@@ -1,0 +1,144 @@
+generated: '2026-08-23'
+method: derived
+source: >-
+  openapi/inrupt-notification-openapi.yaml (components.schemas.HttpProblem, HttpValidationProblem,
+  Violation, and the per-operation response codes), enriched from
+  https://docs.inrupt.com/sdk/javascript-sdk/error-codes and the application/problem+json examples in
+  https://docs.inrupt.com/ess/services/service-pod-management/data-views-api
+format: rfc9457
+media_type: application/problem+json
+envelope:
+  schema: HttpProblem
+  description: HTTP Problem Response according to RFC 9457 and RFC 7807.
+  fields:
+  - name: type
+    type: string (uri)
+    required: false
+    note: >-
+      Declared optional in the schema, and absent from every published example. Live responses observed
+      2026-08-23 from notification.inrupt.com and platform.inrupt.com carry only status, title, detail
+      and instance. So the catalog below is keyed on HTTP status, not on problem type URIs - Inrupt
+      uses the RFC 9457 envelope without the type registry that makes it machine-dispatchable.
+  - name: title
+    type: string
+    required: false
+  - name: status
+    type: integer (int32)
+    required: false
+  - name: detail
+    type: string
+    required: false
+  - name: instance
+    type: string (uri)
+    required: false
+  validation_variant:
+    schema: HttpValidationProblem
+    adds:
+    - name: violations
+      type: array of Violation
+      fields:
+      - field - the field for which validation failed
+      - in - part of the HTTP request where the validation error occurred
+      - message - description of the validation error
+problem_types:
+- status: 400
+  title: Bad Request
+  media_type: application/problem+json
+  schema: HttpValidationProblem
+  operations:
+  - negotiate
+  - createSubscription
+  - createSystemSubscription
+  - reprocessSystemSubscription
+  meaning: >-
+    The request body failed validation. The violations[] array names the offending field and where in
+    the request it occurred.
+  remediation: Correct the named fields and resubmit.
+- status: 401
+  title: Unauthorized
+  media_type: application/problem+json
+  schema: HttpProblem
+  operations:
+  - listSubscriptions
+  - createSubscription
+  - fetchSubscription
+  - removeSubscription
+  - listDeliveryFailures
+  - listSystemSubscriptions
+  - createSystemSubscription
+  - fetchSystemSubscription
+  - removeSystemSubscription
+  - listSystemDeliveryFailures
+  - reprocessSystemSubscription
+  - fetchSystemSubscriptionReprocessStatus
+  meaning: >-
+    Missing, expired or otherwise invalid bearer token. On the SDK surface this also appears when the
+    caller forgot to pass the authenticated session's fetch() into the request.
+  remediation: >-
+    Re-run the token exchange against the Platform Management service and retry. ESS Access Tokens
+    have a 5-minute default TTL, so 401 is an expected, routine outcome for a long-running agent.
+- status: 403
+  title: Forbidden
+  media_type: application/problem+json
+  schema: HttpProblem
+  example_detail: Access has been denied
+  operations:
+  - createSubscription
+  - fetchSubscription
+  - removeSubscription
+  - listDeliveryFailures
+  - fetchSystemSubscription
+  - removeSystemSubscription
+  - listSystemDeliveryFailures
+  - reprocessSystemSubscription
+  - fetchSystemSubscriptionReprocessStatus
+  meaning: >-
+    The token is valid but the agent lacks access to the requested resource - no Access Grant, not the
+    data subject, or not on the system-manager allow list.
+  remediation: >-
+    Request access (Access Request -> Access Grant) or have an administrator add the agent to the
+    relevant allow list.
+- status: 404
+  title: Not Found
+  media_type: application/problem+json
+  schema: HttpProblem
+  observed: >-
+    Live 2026-08-23 - GET https://notification.inrupt.com/q/openapi returned
+    {"status":404,"title":"Not Found","detail":"HTTP 404 Not Found","instance":"/q/openapi"}
+  meaning: The resource does not exist.
+- status: 409
+  title: Conflict
+  media_type: application/problem+json
+  schema: HttpProblem
+  documented_details:
+  - >-
+    "Cannot remove resource with existing direct views. Please remove the views first to delete the
+    resource. Refer to rel=https://w3id.org/inrupt/namespace/vocab/storage/hasViewResource Link headers
+    to discover the views."
+  - "View definition with name '<name>' already exists with different content"
+  meaning: >-
+    On the Solid storage surface, the data being modified changed since the fetch - a SolidDataset
+    changelog's old value no longer matches what is in the Pod. ESS also returns 409 when it encounters
+    unexpected data, such as a Thing's rdf:type set to an integer rather than a URL.
+  remediation: >-
+    Re-fetch the resource and reapply the change; for view conflicts, remove the dependent views first
+    (the response Link headers point at them).
+- status: 412
+  title: Precondition Failed
+  meaning: >-
+    A precondition set by the client library was not met - e.g. saveSolidDatasetAt attempted a create
+    on a URL that already exists because the passed-in dataset carried no identifying URL.
+  remediation: >-
+    Use the SolidDataset returned by the previous save, or re-fetch with getSolidDataset, so the
+    operation becomes an update rather than a create.
+  source: https://docs.inrupt.com/sdk/javascript-sdk/error-codes
+sdk_support:
+  library: '@inrupt/solid-client-errors'
+  version: 0.0.4
+  description: First-party RFC 9457 Problem Details handling library for the JavaScript SDK.
+  url: https://github.com/inrupt/solid-client-errors-js
+gaps:
+- No registry of problem type URIs is published, so an agent cannot dispatch on a stable machine
+  identifier and must branch on HTTP status plus prose detail strings.
+- https://docs.inrupt.com/ess/reference/error-responses is a published page with a heading and no
+  body content (probed 2026-08-23, 200, 293 bytes).

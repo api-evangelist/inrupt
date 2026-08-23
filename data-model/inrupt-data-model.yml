@@ -1,0 +1,160 @@
+generated: '2026-08-23'
+method: derived
+source: >-
+  openapi/inrupt-notification-openapi.yaml ($ref links and id-reference fields), enriched from
+  https://docs.inrupt.com/ess/services/identifiers,
+  https://docs.inrupt.com/ess/services/service-access-grant and
+  https://docs.inrupt.com/reference/glossary
+scope_note: >-
+  Only one Inrupt service publishes a schema document, so the entity graph below is exact for the
+  Notification Delivery Service and descriptive (from prose and RDF vocabularies) for the surrounding
+  Solid entities. Pod data itself is RDF and has no fixed schema by design - the shape of a resource is
+  whatever vocabulary the application uses - which is why there is no global object reference to
+  derive one from.
+identifier_conventions:
+- entity: subscription
+  format: UUID
+- entity: resource
+  format: >-
+    URI. Canonical form {storage-id}/sc/{resource-id} (permanent); path form
+    {storage-id}/sp/{resource-path}.
+- entity: agent
+  format: WebID URI, e.g. https://id.inrupt.com/{username}
+- entity: access grant / access request
+  format: URL of a W3C Verifiable Credential
+entities:
+- name: Subscription
+  source: openapi components.schemas.Subscription
+  fields:
+  - {name: id, type: 'string(uuid)'}
+  - {name: status, type: string}
+  - {name: type, type: 'array<string>', note: one or more notification event types}
+  - {name: purpose, type: string}
+  - {name: storage, type: 'string(uri)', note: required for resource-based subscriptions}
+  - {name: expiration, type: 'string(date-time)'}
+  - {name: jku, type: 'string(uri)', note: JWK Set URL used for message signatures}
+  - {name: deliveryFailures, type: 'string(uri)'}
+  - {name: dataMinimization, type: object}
+  relationships:
+  - {type: has_one, target: Dispatch, via: dispatch}
+  - {type: has_many, target: DeliveryFailure, via: deliveryFailures}
+  - {type: belongs_to, target: Resource, via: storage}
+  - {type: has_one, target: JsonWebKeySet, via: jku}
+- name: Dispatch
+  source: openapi components.schemas.Dispatch
+  fields:
+  - {name: type, type: string, note: must be "webhook"}
+  - {name: uri, type: 'string(uri)'}
+  relationships:
+  - {type: has_one, target: DispatchAuthentication, via: authentication}
+- name: DispatchAuthentication
+  source: openapi components.schemas.DispatchAuthentication
+  fields:
+  - {name: type, type: string, note: e.g. mtls}
+  relationships:
+  - {type: has_one, target: AuthenticationParameters, via: parameters}
+- name: AuthenticationParameters
+  source: openapi components.schemas.AuthenticationParameters
+  fields:
+  - {name: serverCertificate, type: 'string(pem)'}
+- name: NotificationContent
+  source: openapi components.schemas.NotificationContent
+  description: The signed JSON body POSTed to a subscriber's webhook.
+  fields:
+  - {name: id, type: 'string(uuid)'}
+  - {name: type, type: string}
+  - {name: audience, type: 'string(uri)', note: WebID the notification is directed to}
+  - {name: resource, type: 'string(uri)'}
+  - {name: controller, type: 'string(uri)'}
+  - {name: subscription, type: 'string(uuid)'}
+  - {name: purpose, type: string}
+  - {name: dataMinimization, type: object, note: 'retentionPeriod as an ISO-8601 duration'}
+  - {name: published, type: 'string(date-time)'}
+  relationships:
+  - {type: belongs_to, target: Subscription, via: subscription}
+  - {type: belongs_to, target: Resource, via: resource}
+  - {type: belongs_to, target: Agent, via: audience}
+  - {type: belongs_to, target: Agent, via: controller}
+- name: DeliveryFailure
+  source: openapi components.schemas.DeliveryFailure
+  fields:
+  - {name: id, type: 'string(uuid)'}
+  - {name: response, type: string}
+  - {name: date, type: 'string(date-time)'}
+  relationships:
+  - {type: has_one, target: NotificationContent, via: request}
+- name: AsyncTask
+  source: openapi components.schemas.AsyncTask
+  description: A reprocessing task over a system subscription's failed deliveries.
+  fields:
+  - {name: id, type: 'string(uuid)'}
+  - {name: action, type: string}
+  - {name: status, type: string}
+  - {name: startedAt, type: 'string(date-time)'}
+  - {name: lastUpdatedAt, type: 'string(date-time)'}
+  relationships:
+  - {type: belongs_to, target: Subscription, via: subscription}
+  - {type: belongs_to, target: Agent, via: agent}
+- name: JsonWebKeySet
+  source: openapi components.schemas.JsonWebKeySet
+  relationships:
+  - {type: has_many, target: JsonWebKey, via: keys}
+- name: JsonWebKey
+  source: openapi components.schemas.JsonWebKey
+  fields: [kty, use, alg, kid, x, y, crv, n, e, x5c]
+- name: HttpProblem
+  source: openapi components.schemas.HttpProblem
+  description: RFC 9457 error envelope; see errors/inrupt-problem-types.yml.
+  relationships:
+  - {type: has_many, target: Violation, via: violations, note: on the HttpValidationProblem variant}
+- name: Agent
+  source: prose - https://docs.inrupt.com/reference/glossary
+  description: An identity in Solid, addressed by a WebID URI.
+  relationships:
+  - {type: has_many, target: Storage, via: 'ownership (max 10 on PodSpaces)'}
+  - {type: has_one, target: WebIDProfile, via: WebID document}
+- name: Storage
+  aka: Pod
+  description: A personal data store; the root of a resource tree with its own storage identifier.
+  relationships:
+  - {type: belongs_to, target: Agent, via: owner}
+  - {type: has_many, target: Resource, via: containment}
+- name: Resource
+  description: An RDF or binary resource in a Pod, with an Access Control Resource attached.
+  relationships:
+  - {type: belongs_to, target: Storage, via: 'storage id'}
+  - {type: has_one, target: AccessControlResource, via: acl/acr link}
+  - {type: has_many, target: DataView, via: hasViewResource link relation}
+- name: AccessRequest
+  description: A W3C Verifiable Credential asking a data subject for access to named resources.
+  fields: [resource, permission, dataSubject, purpose, status]
+  status_values: [pending, granted, denied, cancelled]
+  relationships:
+  - {type: belongs_to, target: Agent, via: dataSubject}
+  - {type: belongs_to, target: Resource, via: resource}
+  - {type: has_one, target: AccessGrant, via: 'approval'}
+- name: AccessGrant
+  description: >-
+    A W3C Verifiable Credential recording granted access. As of ESS 3.0 it acts as a receipt that ESS
+    checks server-side on each access.
+  fields: [isProvidedTo, resource, modes, purpose, expiration, status]
+  relationships:
+  - {type: belongs_to, target: Agent, via: 'issuer (data subject)'}
+  - {type: belongs_to, target: Agent, via: isProvidedTo}
+  - {type: belongs_to, target: Resource, via: resource}
+- name: DataView
+  description: A GraphQL-defined projection of a source resource, registered and then bound.
+  source: https://docs.inrupt.com/ess/services/service-pod-management/data-views-api
+  fields: [type, name, schema, query]
+  binding_types: [VIEW_RESOURCE, VIEW_CONTAINER]
+  relationships:
+  - {type: belongs_to, target: Resource, via: sourceResource}
+  - {type: has_one, target: Resource, via: destinationResource}
+relationship_notes:
+- >-
+  The central relationship in the whole model is Agent -> AccessGrant -> Resource: consent is a
+  first-class, addressable, revocable object rather than a row in an ACL, which is what makes the
+  reversibility posture in conventions/inrupt-conventions.yml possible.
+- >-
+  A Resource cannot be deleted while a DataView binds to it; the 409 response points at the blocking
+  views through rel=https://w3id.org/inrupt/namespace/vocab/storage/hasViewResource Link headers.

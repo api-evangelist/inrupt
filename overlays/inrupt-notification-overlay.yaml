@@ -1,0 +1,95 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for Inrupt Change Notifications
+  version: 1.0.0
+x-generated: '2026-08-23'
+x-method: generated
+x-source: openapi/inrupt-notification-openapi.yaml
+x-extends: openapi/inrupt-notification-openapi.yaml
+x-note: >-
+  Additive only. Every action below records something Inrupt publishes elsewhere (its service
+  reference, its hosted deployment, its RFC claims) that the spec itself omits. The original document
+  at https://notification.inrupt.com/openapi.yaml is never mutated.
+actions:
+- target: $.info
+  description: Add contact, licence-free description and documentation context absent from info.
+  update:
+    description: >-
+      The ESS Notification Delivery Service lets an authorized agent subscribe to change events on Pod
+      resources and on Access Requests and Grants, and receive them as RFC 9421-signed webhook POSTs at
+      a remote HTTPS endpoint. Two scopes exist - /subscriptions for authenticated users (delivery is
+      further filtered by the subscriber's own authorization on the resource) and /system/subscriptions
+      for allow-listed system managers whose legal basis for processing is contract.
+    contact:
+      name: Inrupt Service Desk
+      url: https://inrupt.atlassian.net/servicedesk
+    x-documentation: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+- target: $
+  description: >-
+    Add a servers block. The published document declares no servers[], so a tool cannot resolve a
+    request URL from the spec alone. ESS is customer-deployed, so the host is templated, with Inrupt's
+    own hosted PodSpaces deployment as the default.
+  update:
+    servers:
+    - url: https://notification.{essDomain}
+      description: ESS Notification Delivery Service for a given deployment.
+      variables:
+        essDomain:
+          default: inrupt.com
+          description: >-
+            The ESS deployment domain. inrupt.com is Inrupt's hosted PodSpaces developer preview.
+- target: $
+  description: Record the standards this service implements, verified against its own documentation.
+  update:
+    x-conformance:
+      error_format: rfc9457
+      webhook_signatures: rfc9421
+      auth: solid-oidc, oauth2-token-exchange-rfc8693, dpop-rfc9449
+      pagination: page/pageSize with RFC 8288 Link rel=next / rel=prev
+- target: $.paths['/subscriptions'].get
+  description: Document the pagination contract, which is described in the service reference but not in the spec.
+  update:
+    x-pagination:
+      style: page-number
+      params: [page, pageSize]
+      page_size_max: 100
+      page_size_default: 10
+      link_headers: ['rel="next"', 'rel="prev"']
+- target: $.paths['/subscriptions'].post
+  description: Record the event-type enumeration accepted in the request body's type[] array.
+  update:
+    x-event-types:
+    - AccessRequestPending
+    - AccessRequestDenied
+    - AccessGrantIssued
+    - AccessGrantRevoked
+    - AccessGrantExpired
+    - ResourceCreated
+    - ResourceUpdated
+    - ResourceDeleted
+    - ContainerCreated
+    - ContainerUpdated
+    - ContainerDeleted
+    x-idempotency: >-
+      None. Repeating this request creates an additional subscription; there is no client-supplied
+      request key and no server-side deduplication.
+    x-reversibility:
+      operation: removeSubscription
+      window: any time while the subscription exists
+- target: $.paths['/subscriptions/{identifier}'].delete
+  description: Mark the reversal relationship explicitly for agent tooling.
+  update:
+    x-reverses: createSubscription
+- target: $.components.schemas.Subscription.properties.storage
+  description: Record the ESS 3.0 canonical-URI requirement, which is a correctness trap for clients.
+  update:
+    x-required-uri-form: >-
+      Must be the canonical resource URI ({storage-id}/sc/{resource-id}), not the path URI
+      ({storage-id}/sp/{resource-path}), so the subscription survives a deployment domain change.
+- target: $.components.securitySchemes.SolidAuthentication
+  description: Describe how the bearer token is actually obtained.
+  update:
+    description: >-
+      A Solid-OIDC access token, or an ESS Access Token obtained by RFC 8693 token exchange against
+      https://platform.{essDomain}/access/token. Default ESS Access Token TTL is 5 minutes; treat 401
+      as routine and re-exchange.

@@ -1,0 +1,18 @@
+{
+    "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://schema.inrupt.com/credentials/v2.jsonld"
+    ],
+    "issuerService": "https://vc.inrupt.com/issue",
+    "statusService": "https://vc.inrupt.com/status",
+    "verifierService": "https://vc.inrupt.com/verify",
+    "derivationService": "https://vc.inrupt.com/derive",
+    "proofService": null,
+    "availabilityService": null,
+    "submissionService": null,
+    "queryService": "https://vc.inrupt.com/query",
+    "notificationService": null,
+    "supportedSignatureTypes": [
+        "https://w3id.org/security#Ed25519Signature2020"
+    ]
+}

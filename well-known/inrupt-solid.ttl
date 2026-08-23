@@ -1,0 +1,8 @@
+PREFIX solid: <http://www.w3.org/ns/solid/terms#>
+
+[ a                          solid:DiscoveryDocument;
+  solid:maxPodsPerOwner      "10"^^<http://www.w3.org/2001/XMLSchema#int>;
+  solid:notificationGateway  <https://notification.inrupt.com/>;
+  solid:provision            <https://provision.inrupt.com/>;
+  solid:qpf                  <https://fragments.inrupt.com/>
+] .

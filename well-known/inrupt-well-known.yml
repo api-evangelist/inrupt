@@ -1,0 +1,124 @@
+generated: '2026-08-23'
+method: probed
+source: >-
+  Live probes of /.well-known/ paths on every apis.yml baseURL host plus the docs and marketing hosts,
+  2026-08-23. Only responses carrying a real, correctly-typed document were saved verbatim.
+note: >-
+  Inrupt does not serve /.well-known/security.txt, /.well-known/api-catalog or /.well-known/ai-plugin.json
+  on any host. It DOES serve three real discovery documents that its own ESS documentation specifies
+  (https://docs.inrupt.com/ess/services/appendix/discovery-endpoint): an OpenID Connect discovery
+  document on the Solid OIDC provider, a Solid discovery document (RDF/Turtle) on the Pod storage host,
+  and a Verifiable-Credential service configuration on the Access Grant host. Pod storage hosts answer
+  401 rather than 404 for unknown /.well-known/ paths because every non-public path on a Pod requires
+  authorization.
+hosts:
+- host: https://login.inrupt.com
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 200
+    type: application/json
+    file: inrupt-openid-configuration.json
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: https://storage.inrupt.com
+  documents:
+  - path: /.well-known/solid
+    status: 200
+    type: text/turtle
+    file: inrupt-solid.ttl
+  - path: /.well-known/openid-configuration
+    status: 401
+  - path: /.well-known/oauth-authorization-server
+    status: 401
+  - path: /.well-known/security.txt
+    status: 401
+  - path: /.well-known/api-catalog
+    status: 401
+  - path: /.well-known/agent-card.json
+    status: 401
+  - path: /.well-known/agent.json
+    status: 401
+- host: https://storage.ap.inrupt.com
+  documents:
+  - path: /.well-known/solid
+    status: 200
+    note: >-
+      Asia-Pacific PodSpaces storage host; returns the same Solid DiscoveryDocument shape as
+      storage.inrupt.com. Not saved separately.
+  - path: /.well-known/security.txt
+    status: 401
+  - path: /.well-known/api-catalog
+    status: 401
+- host: https://vc.inrupt.com
+  documents:
+  - path: /.well-known/vc-configuration
+    status: 200
+    type: application/json
+    file: inrupt-vc-configuration.json
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/solid
+    status: 404
+- host: https://notification.inrupt.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /openapi.yaml
+    status: 200
+    type: application/yaml
+    note: >-
+      Not a /.well-known/ path, but this is where the machine-readable contract actually lives —
+      the ESS Notification Delivery Service serves its own OpenAPI 3.1.0 document at /openapi,
+      /openapi.yaml and /openapi.json. Saved to openapi/inrupt-notification-openapi.yaml.
+- host: https://id.inrupt.com
+  documents:
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+- host: https://docs.inrupt.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+  - path: /llms.txt
+    status: 200
+    type: text/markdown
+    note: Saved verbatim to llms/inrupt-llms.txt (not a /.well-known/ path).
+- host: https://www.inrupt.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 404
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/ai-plugin.json
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
