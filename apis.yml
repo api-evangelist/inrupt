@@ -35,38 +35,14 @@ tags:
 - Model Context Protocol
 - Enterprise Software
 apis:
-- aid: inrupt:notification-delivery
-  name: Inrupt Change Notifications API (ESS Notification Delivery Service)
-  description: >-
-    The ESS Notification Delivery Service lets an authorized agent subscribe to change events on Pod
-    resources and on Access Requests/Grants, and have them delivered as signed webhooks to a remote
-    HTTPS endpoint. Subscriptions are created and managed over a REST API described by a first-party
-    OpenAPI 3.1.0 document the service serves itself at /openapi. Fourteen operations cover protocol
-    negotiation, the JWKS used to verify outbound message signatures, user subscriptions, system
-    subscriptions, delivery-failure listings, and reprocessing of failed deliveries.
-  humanURL: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
-  baseURL: https://notification.inrupt.com
-  tags:
-  - Notifications
-  - Webhooks
-  - Events
-  - Subscriptions
-  properties:
-  - type: OpenAPI
-    url: openapi/inrupt-notification-openapi.yaml
-  - type: Documentation
-    url: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
-  - type: Webhooks
-    url: asyncapi/inrupt-notifications-webhooks.yml
 - aid: inrupt:pod-storage
   name: Inrupt Pod Storage API (Solid Protocol)
   description: >-
-    The ESS Pod Storage Service implements the Solid Protocol over HTTP — LDP-style container and
-    resource CRUD in RDF (Turtle, JSON-LD) and binary form, with Access Control Policy (ACP)
-    resources, canonical /sc/ and path-based /sp/ resource URIs, and a Data Views API that projects
-    stored resources through registered GraphQL view definitions. On the hosted PodSpaces deployment
-    the storage host is https://storage.inrupt.com and its discovery document is served at
-    /.well-known/solid.
+    The ESS Pod Storage Service implements the Solid Protocol over HTTP — LDP-style container and resource
+    CRUD in RDF (Turtle, JSON-LD) and binary form, with Access Control Policy (ACP) resources, canonical
+    /sc/ and path-based /sp/ resource URIs, and a Data Views API that projects stored resources through
+    registered GraphQL view definitions. On the hosted PodSpaces deployment the storage host is https://storage.inrupt.com
+    and its discovery document is served at /.well-known/solid.
   humanURL: https://docs.inrupt.com/ess/services/service-pod-management/service-pod-storage
   baseURL: https://storage.inrupt.com
   tags:
@@ -84,8 +60,8 @@ apis:
   description: >-
     Inrupt's hosted Solid-OIDC identity provider for PodSpaces WebIDs. It publishes a standard OpenID
     Connect discovery document at /.well-known/openid-configuration advertising authorization, token,
-    userinfo, JWKS, dynamic client registration, revocation and end-session endpoints, the openid /
-    offline_access / webid scopes, and DPoP proof signing algorithms.
+    userinfo, JWKS, dynamic client registration, revocation and end-session endpoints, the openid / offline_access
+    / webid scopes, and DPoP proof signing algorithms.
   humanURL: https://docs.inrupt.com/guides/authentication-in-solid
   baseURL: https://login.inrupt.com
   tags:
@@ -105,11 +81,11 @@ apis:
 - aid: inrupt:access-grant
   name: Inrupt Access Grant Service (VC API)
   description: >-
-    The ESS Access Grant Service issues, queries, verifies, derives and status-checks W3C Verifiable
-    Credentials that carry Access Requests and Access Grants — the consent receipts that authorize one
-    agent to read another agent's Pod resources. The service publishes its endpoint map at
-    /.well-known/vc-configuration; on PodSpaces that is https://vc.inrupt.com, which advertises the
-    /issue, /status, /verify, /derive and /query services and Ed25519Signature2020 proofs.
+    The ESS Access Grant Service issues, queries, verifies, derives and status-checks W3C Verifiable Credentials
+    that carry Access Requests and Access Grants — the consent receipts that authorize one agent to read
+    another agent's Pod resources. The service publishes its endpoint map at /.well-known/vc-configuration;
+    on PodSpaces that is https://vc.inrupt.com, which advertises the /issue, /status, /verify, /derive
+    and /query services and Ed25519Signature2020 proofs.
   humanURL: https://docs.inrupt.com/ess/services/service-access-grant
   baseURL: https://vc.inrupt.com
   tags:
@@ -125,13 +101,13 @@ apis:
 - aid: inrupt:mcp-resource
   name: Inrupt ESS MCP Resource Service
   description: >-
-    Added in ESS 3.0, the MCP Resource Service exposes four Model Context Protocol tools —
-    requestAccess, checkAccessRequestStatus, hasMatchingAccessGrant and getResource — over
-    streamable HTTP, so an AI agent can ask a person for consent to their Pod data, wait for the
-    approval, and then read the granted resource. Every operation is scoped to the authenticated
-    delegator, so an agent can never exceed the current user's own access rights. The endpoint is
-    per-deployment (https://mcp.{ess-domain}/api) and is authenticated with an ESS Access Token
-    obtained by OAuth 2.0 token exchange against the Platform Management service.
+    Added in ESS 3.0, the MCP Resource Service exposes four Model Context Protocol tools — requestAccess,
+    checkAccessRequestStatus, hasMatchingAccessGrant and getResource — over streamable HTTP, so an AI
+    agent can ask a person for consent to their Pod data, wait for the approval, and then read the granted
+    resource. Every operation is scoped to the authenticated delegator, so an agent can never exceed the
+    current user's own access rights. The endpoint is per-deployment (https://mcp.{ess-domain}/api) and
+    is authenticated with an ESS Access Token obtained by OAuth 2.0 token exchange against the Platform
+    Management service.
   humanURL: https://docs.inrupt.com/ess/services/service-mcp/mcp-resource
   baseURL: https://mcp.{ess-domain}/api
   tags:
@@ -150,11 +126,10 @@ apis:
   name: Inrupt ESS Platform Management API
   description: >-
     The Platform Management service hosts the ESS Admin API used to provision users before they first
-    log in — creating a provisioning account, attaching a WebID and a storage container, setting
-    identity mappings, then activating the account and transferring ownership to the end user — plus
-    self-service /user/account endpoints and the OAuth 2.0 token-exchange endpoint (RFC 8693) that
-    turns an external IdP id_token into an ESS Access Token. Access to the Admin API is restricted to
-    Service Accounts.
+    log in — creating a provisioning account, attaching a WebID and a storage container, setting identity
+    mappings, then activating the account and transferring ownership to the end user — plus self-service
+    /user/account endpoints and the OAuth 2.0 token-exchange endpoint (RFC 8693) that turns an external
+    IdP id_token into an ESS Access Token. Access to the Admin API is restricted to Service Accounts.
   humanURL: https://docs.inrupt.com/ess/services/service-platform-management/platform-management-api
   baseURL: https://platform.inrupt.com
   tags:
@@ -165,6 +140,48 @@ apis:
   properties:
   - type: Documentation
     url: https://docs.inrupt.com/ess/services/service-platform-management/platform-management-api
+- aid: inrupt:inrupt-discovery-api
+  name: Inrupt Discovery API
+  description: WebSocket Discovery
+  humanURL: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+  baseURL: https://notification.inrupt.com
+  tags:
+  - discovery
+  properties:
+  - type: OpenAPI
+    url: openapi/inrupt-discovery-api-openapi.yml
+  - type: Documentation
+    url: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+  - type: Webhooks
+    url: asyncapi/inrupt-notifications-webhooks.yml
+- aid: inrupt:inrupt-jsonkeys-api
+  name: Inrupt Jsonkeys API
+  description: Public JSON Web Keys
+  humanURL: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+  baseURL: https://notification.inrupt.com
+  tags:
+  - jsonkeys
+  properties:
+  - type: OpenAPI
+    url: openapi/inrupt-jsonkeys-api-openapi.yml
+  - type: Documentation
+    url: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+  - type: Webhooks
+    url: asyncapi/inrupt-notifications-webhooks.yml
+- aid: inrupt:inrupt-subscription-api
+  name: Inrupt Subscription API
+  description: Subscription Management
+  humanURL: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+  baseURL: https://notification.inrupt.com
+  tags:
+  - subscription
+  properties:
+  - type: OpenAPI
+    url: openapi/inrupt-subscription-api-openapi.yml
+  - type: Documentation
+    url: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
+  - type: Webhooks
+    url: asyncapi/inrupt-notifications-webhooks.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
