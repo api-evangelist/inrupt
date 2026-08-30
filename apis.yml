@@ -44,6 +44,21 @@ tags:
 - Consent Management
 - Data Wallets
 - Agent Infrastructure
+- MCP
+- Enterprise Software
+tags_raw:
+- Company
+- Solid
+- Personal Data Stores
+- Decentralized Identity
+- Data Privacy
+- Access Control
+- Verifiable Credentials
+- Linked Data
+- RDF
+- Consent Management
+- Data Wallets
+- Agent Infrastructure
 - Model Context Protocol
 - Enterprise Software
 apis:
@@ -123,6 +138,11 @@ apis:
   humanURL: https://docs.inrupt.com/ess/services/service-mcp/mcp-resource
   baseURL: https://mcp.{ess-domain}/api
   tags:
+  - MCP
+  - AI Agents
+  - Consent
+  - Access Grants
+  tags_raw:
   - Model Context Protocol
   - AI Agents
   - Consent
@@ -158,6 +178,8 @@ apis:
   humanURL: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
   baseURL: https://notification.inrupt.com
   tags:
+  - Discovery
+  tags_raw:
   - discovery
   properties:
   - type: OpenAPI
@@ -186,6 +208,8 @@ apis:
   humanURL: https://docs.inrupt.com/ess/services/service-notification/notification-delivery-service
   baseURL: https://notification.inrupt.com
   tags:
+  - Subscription
+  tags_raw:
   - subscription
   properties:
   - type: OpenAPI
