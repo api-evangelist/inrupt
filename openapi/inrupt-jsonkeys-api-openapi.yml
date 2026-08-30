@@ -1,0 +1,77 @@
+openapi: 3.2.0
+info:
+  title: Inrupt Change Notifications Jsonkeys API
+  version: 2.7.1
+  description: Public JSON Web Keys
+servers:
+- url: https://notification.inrupt.com
+  description: Base URL declared by the provider in apis.yml (roadmap#122).
+tags:
+- name: jsonkeys
+  description: Public JSON Web Keys
+paths:
+  /jwks:
+    get:
+      summary: List JSON Web Keys for this server
+      operationId: getJsonWebKeySet
+      tags:
+      - jsonkeys
+      responses:
+        '200':
+          description: A JSON object that represents a set of JSON Web Keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonWebKeySet'
+components:
+  schemas:
+    JsonWebKeySet:
+      type: object
+      description: A set of JSON Web Keys
+      properties:
+        keys:
+          type: array
+          items:
+            $ref: '#/components/schemas/JsonWebKey'
+          description: A collection of JSON Web keys
+    JsonWebKey:
+      type: object
+      description: A single JSON Web Key
+      properties:
+        kty:
+          type: string
+          description: The cryptographic algorithm family
+        use:
+          type: string
+          description: The intended use of the public key
+        alg:
+          type: string
+          description: The algorithm intended for use with the key
+        kid:
+          type: string
+          description: The key ID is used to match a specific key
+        x:
+          type: string
+          description: For EC keys, a base64 encoding of the x coordinate
+        y:
+          type: string
+          description: For EC keys, a base64 encoding of the y coordinate
+        crv:
+          type: string
+          description: For EC keys, a cryptographic curve used with the key
+        n:
+          type: string
+          description: For RSA keys, a base64 encoding of the modulus value
+        e:
+          type: string
+          description: For RSA keys, a base64 encoding of the exponent value
+        x5c:
+          type: array
+          items:
+            type: string
+          description: An X.509 certificate for the key
+  securitySchemes:
+    SolidAuthentication:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

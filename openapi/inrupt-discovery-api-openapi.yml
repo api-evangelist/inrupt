@@ -1,0 +1,70 @@
+openapi: 3.2.0
+info:
+  title: Inrupt Change Notifications Discovery API
+  version: 2.7.1
+  description: WebSocket Discovery
+servers:
+- url: https://notification.inrupt.com
+  description: Base URL declared by the provider in apis.yml (roadmap#122).
+tags:
+- name: discovery
+  description: WebSocket Discovery
+paths:
+  /:
+    post:
+      summary: Find a mutually-acceptable notification protocol
+      operationId: negotiate
+      tags:
+      - discovery
+      requestBody:
+        description: The protocol negotiation request
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NegotiationRequest'
+      responses:
+        '200':
+          description: Negotiate a notification protocol
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NegotiationResponse'
+        '400':
+          description: Bad Request
+components:
+  schemas:
+    NegotiationRequest:
+      type: object
+      description: A negotiation request for a notification protocol
+      properties:
+        protocols:
+          type: array
+          items:
+            type: string
+          description: The acceptable protocols
+        features:
+          type: array
+          items:
+            type: string
+          description: The required features
+    NegotiationResponse:
+      type: object
+      description: The negotiated notification protocol
+      properties:
+        protocol:
+          type: string
+          description: The negotiated protocol
+        endpoint:
+          type: string
+          description: The subscription endpoint for the negotiated protocol
+        features:
+          type: array
+          items:
+            type: string
+          description: The available features for the negotiated protocol
+  securitySchemes:
+    SolidAuthentication:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

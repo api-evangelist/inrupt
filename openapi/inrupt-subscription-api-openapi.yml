@@ -1,0 +1,831 @@
+openapi: 3.2.0
+info:
+  title: Inrupt Change Notifications Subscription API
+  version: 2.7.1
+  description: Subscription Management
+servers:
+- url: https://notification.inrupt.com
+  description: Base URL declared by the provider in apis.yml (roadmap#122).
+tags:
+- name: subscription
+  description: Subscription Management
+paths:
+  /subscriptions:
+    get:
+      summary: List all subscriptions
+      operationId: listSubscriptions
+      tags:
+      - subscription
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          description: The page number, starting at 1 for the first page
+          default: 1
+          minimum: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          description: The number of items to include in a page of results
+          default: 10
+          minimum: 1
+      responses:
+        '200':
+          description: List the subscriptions associated with an agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSubscription'
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+    post:
+      summary: Create a new subscription
+      operationId: createSubscription
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      responses:
+        '201':
+          description: A subscription was successfully created
+          headers:
+            location:
+              description: The location of the newly created subscription
+              schema:
+                type: string
+                format: uri
+          links:
+            removeSubscription:
+              operationId: removeSubscription
+              parameters:
+                identifier: $response.body#/id
+            fetchSubscription:
+              operationId: fetchSubscription
+              parameters:
+                identifier: $response.body#/id
+            listDeliveryFailures:
+              operationId: listDeliveryFailures
+              parameters:
+                identifier: $response.body#/id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Invalid data was provided to the endpoint
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+  /subscriptions/{identifier}:
+    delete:
+      summary: Remove an existing subscription
+      operationId: removeSubscription
+      tags:
+      - subscription
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          description: The subscription identifier
+      responses:
+        '204':
+          description: The subscription was successfully removed
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+    get:
+      summary: Fetch an existing subscription
+      operationId: fetchSubscription
+      tags:
+      - subscription
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          description: The subscription identifier
+      responses:
+        '200':
+          description: Data related to the specified subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          links:
+            removeSubscription:
+              operationId: removeSubscription
+              parameters:
+                identifier: $response.body#/id
+            listDeliveryFailures:
+              operationId: listDeliveryFailures
+              parameters:
+                identifier: $response.body#/id
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+  /subscriptions/{identifier}/delivery-failures:
+    get:
+      summary: Fetch the delivery failures for a specific subscription
+      operationId: listDeliveryFailures
+      tags:
+      - subscription
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          description: The subscription identifier
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          description: The page number, starting at 1 for the first page
+          default: 1
+          minimum: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          description: The number of items to include in a page of results
+          default: 10
+          minimum: 1
+      responses:
+        '200':
+          description: A list of failures for the given subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageDeliveryFailure'
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+  /system/subscriptions:
+    get:
+      summary: List all system subscriptions
+      operationId: listSystemSubscriptions
+      tags:
+      - subscription
+      parameters:
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          description: The page number, starting at 1 for the first page
+          default: 1
+          minimum: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          description: The number of items to include in a page of results
+          default: 10
+          minimum: 1
+      responses:
+        '200':
+          description: List the system subscriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSubscription'
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+    post:
+      summary: Create a new system subscription
+      operationId: createSystemSubscription
+      tags:
+      - subscription
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+        required: true
+      responses:
+        '201':
+          description: A system subscription was successfully created
+          headers:
+            location:
+              description: The location of the newly created subscription
+              schema:
+                type: string
+                format: uri
+          links:
+            removeSystemSubscription:
+              operationId: removeSystemSubscription
+              parameters:
+                identifier: $response.body#/id
+            fetchSystemSubscription:
+              operationId: fetchSystemSubscription
+              parameters:
+                identifier: $response.body#/id
+            listSystemDeliveryFailures:
+              operationId: listSystemDeliveryFailures
+              parameters:
+                identifier: $response.body#/id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Invalid data was provided to the endpoint
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+  /system/subscriptions/{identifier}:
+    delete:
+      summary: Remove an existing system subscription
+      operationId: removeSystemSubscription
+      tags:
+      - subscription
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          description: The subscription identifier
+      responses:
+        '204':
+          description: The system subscription was successfully removed
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+    get:
+      summary: Fetch an existing system subscription
+      operationId: fetchSystemSubscription
+      tags:
+      - subscription
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          description: The subscription identifier
+      responses:
+        '200':
+          description: Data related to the specified system subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+          links:
+            removeSystemSubscription:
+              operationId: removeSystemSubscription
+              parameters:
+                identifier: $response.body#/id
+            listSystemDeliveryFailures:
+              operationId: listSystemDeliveryFailures
+              parameters:
+                identifier: $response.body#/id
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+  /system/subscriptions/{identifier}/delivery-failures:
+    get:
+      summary: Fetch the delivery failures for a specific system subscription
+      operationId: listSystemDeliveryFailures
+      tags:
+      - subscription
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          description: The subscription identifier
+      - name: page
+        in: query
+        schema:
+          type: integer
+          format: int32
+          description: The page number, starting at 1 for the first page
+          default: 1
+          minimum: 1
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          format: int32
+          description: The number of items to include in a page of results
+          default: 10
+          minimum: 1
+      responses:
+        '200':
+          description: A list of failures for the given system subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageDeliveryFailure'
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+  /system/subscriptions/{subscription}/delivery-failures/reprocess:
+    post:
+      summary: Reprocess any failed deliveries for the given system subscription
+      operationId: reprocessSystemSubscription
+      tags:
+      - subscription
+      parameters:
+      - name: subscription
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReprocessRequest'
+        required: true
+      responses:
+        '201':
+          description: Reprocess any failed deliveries for a subscription
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '400':
+          description: Bad Request
+      security:
+      - SolidAuthentication: []
+  /system/subscriptions/{subscription}/delivery-failures/reprocess/{identifier}:
+    get:
+      summary: Fetch the status of a reprocessing task
+      operationId: fetchSystemSubscriptionReprocessStatus
+      tags:
+      - subscription
+      parameters:
+      - name: identifier
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: subscription
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Status information about reprocessing failed deliveries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AsyncTask'
+        '401':
+          description: The agent is not authenticated
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+        '403':
+          description: The agent is not authorized to perform this operation
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/HttpProblem'
+      security:
+      - SolidAuthentication: []
+components:
+  schemas:
+    AsyncTask:
+      type: object
+      required:
+      - agent
+      - action
+      - subscription
+      - id
+      - status
+      - startedAt
+      - lastUpdatedAt
+      properties:
+        agent:
+          type: string
+          format: uri
+          description: WebID of the agent who triggered the reprocess task
+        action:
+          type: string
+          enum:
+          - retry
+          description: The action performed on reprocessed dispatches
+        subscription:
+          type: string
+          format: uuid
+          description: The reprocess task identifier
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The task identifier
+        status:
+          type: string
+          readOnly: true
+          enum:
+          - Pending
+          - Active
+          - Done
+          description: Status of the task
+        startedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Starting time of the task
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Last update time of the task
+    PageSubscription:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    HttpProblem:
+      type: object
+      additionalProperties: true
+      description: HTTP Problem Response according to RFC9457 and RFC7807
+      properties:
+        type:
+          type: string
+          format: uri
+          examples:
+          - https://example.com/errors/not-found
+          description: A optional URI reference that identifies the problem type
+        title:
+          type: string
+          examples:
+          - Not Found
+          description: A optional, short, human-readable summary of the problem type
+        status:
+          type: integer
+          format: int32
+          examples:
+          - 404
+          description: The HTTP status code for this occurrence of the problem
+        detail:
+          type: string
+          examples:
+          - Record not found
+          description: A optional human-readable explanation specific to this occurrence of the problem
+        instance:
+          type: string
+          format: uri
+          examples:
+          - https://api.example.com/errors/123
+          description: A URI reference that identifies the specific occurrence of the problem
+    DeliveryFailure:
+      type: object
+      description: A data structure representing a delivery failure
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The delivery failure identifier
+        request:
+          $ref: '#/components/schemas/NotificationContent'
+        response:
+          type: string
+          description: The failure response from the remote endpoint
+        date:
+          type: string
+          format: date-time
+          description: The date of the attempted message dispatch
+    ReprocessRequest:
+      type: object
+      required:
+      - action
+      properties:
+        action:
+          type: string
+          enum:
+          - retry
+          description: Action to perform on the failed notifications
+    Dispatch:
+      type: object
+      required:
+      - type
+      - uri
+      description: The configured dispatch mechanism for a subscription
+      properties:
+        type:
+          type: string
+          enum:
+          - webhook
+          description: Dispatch type
+        uri:
+          type: string
+          format: uri
+          description: URL of the associated webhook
+        authentication:
+          $ref: '#/components/schemas/DispatchAuthentication'
+    Subscription:
+      type: object
+      required:
+      - type
+      - dispatch
+      description: A data structure representing a user-defined subscription
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The subscription identifier
+        status:
+          type: string
+          readOnly: true
+          description: The current status of the subscription
+        deliveryFailures:
+          type: string
+          format: uri
+          readOnly: true
+          description: The URL where a client can retrieve notifications that the server failed to deliver
+        jku:
+          type: string
+          format: uri
+          readOnly: true
+          description: The URL of the JWK Set used with message signatures
+        purpose:
+          type: string
+          maxLength: 1024
+          description: Purpose of the subscription
+        type:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum:
+            - AccessRequestPending
+            - AccessRequestDenied
+            - AccessGrantIssued
+            - AccessGrantRevoked
+            - AccessGrantExpired
+            - ResourceCreated
+            - ResourceUpdated
+            - ResourceDeleted
+            - ContainerCreated
+            - ContainerUpdated
+            - ContainerDeleted
+          description: Event types associated with the subscription
+        dataMinimization:
+          type: object
+          required:
+          - retentionPeriod
+          description: Data minimization definitions associated with the subscription
+          properties:
+            retentionPeriod:
+              type: string
+              format: duration
+              examples:
+              - P30D
+              - P90D
+              - PT12H
+              - P1DT12H30M
+              pattern: ^P[0-9]+D(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?)$
+              description: The data retention period for this message
+        dispatch:
+          $ref: '#/components/schemas/Dispatch'
+        expiration:
+          type: string
+          format: date-time
+          readOnly: true
+          examples:
+          - 2022-03-10 16:15:50+00:00
+          description: The expiration date of the subscription
+        storage:
+          type: string
+          format: uri
+          description: The URL of the resource storage associated with the subscription
+    NotificationContent:
+      type: object
+      description: The request data sent to a remote endpoint
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The delivery request identifier
+        type:
+          type: string
+          enum:
+          - AccessRequestPending
+          - AccessRequestDenied
+          - AccessGrantIssued
+          - AccessGrantRevoked
+          - AccessGrantExpired
+          - ResourceCreated
+          - ResourceUpdated
+          - ResourceDeleted
+          - ContainerCreated
+          - ContainerUpdated
+          - ContainerDeleted
+          description: The delivery request type
+        audience:
+          type: string
+          format: uri
+          description: The agent to whom the delivery request is directed
+        resource:
+          type: string
+          format: uri
+          description: The resource associated with the notification
+        controller:
+          type: string
+          format: uri
+          description: The controller or owner of the resource associated with the notification
+        subscription:
+          type: string
+          format: uuid
+          description: The subscription associated with the delivery request
+        purpose:
+          type: string
+          maxLength: 1024
+          description: The purpose of the associated subscription
+        dataMinimization:
+          type: object
+          required:
+          - retentionPeriod
+          description: Data minimization definitions associated with the subscription
+          properties:
+            retentionPeriod:
+              type: string
+              format: duration
+              examples:
+              - P30D
+              - P90D
+              - PT12H
+              - P1DT12H30M
+              pattern: ^P[0-9]+D(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?)$
+              description: The data retention period for this message
+        published:
+          type: string
+          format: date-time
+          description: The date of the notification attempt
+    DispatchAuthentication:
+      type: object
+      required:
+      - type
+      description: The authentication configuration for a dispatch mechanism
+      properties:
+        type:
+          type: string
+          enum:
+          - mtls
+          description: Authentication type used with the dispatch mechanism
+        parameters:
+          $ref: '#/components/schemas/AuthenticationParameters'
+    AuthenticationParameters:
+      type: object
+      description: Parameters associated with the authentication mechanism
+      properties:
+        serverCertificate:
+          type: string
+          format: pem
+          description: A PEM-formatted X.509 server certificate
+    PageDeliveryFailure:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryFailure'
+  securitySchemes:
+    SolidAuthentication:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
