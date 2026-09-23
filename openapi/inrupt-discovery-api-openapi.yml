@@ -7,7 +7,7 @@ servers:
 - url: https://notification.inrupt.com
   description: Base URL declared by the provider in apis.yml (roadmap#122).
 tags:
-- name: discovery
+- name: Discovery
   description: WebSocket Discovery
 paths:
   /:
@@ -15,7 +15,7 @@ paths:
       summary: Find a mutually-acceptable notification protocol
       operationId: negotiate
       tags:
-      - discovery
+      - Discovery
       requestBody:
         description: The protocol negotiation request
         required: true
@@ -34,20 +34,6 @@ paths:
           description: Bad Request
 components:
   schemas:
-    NegotiationRequest:
-      type: object
-      description: A negotiation request for a notification protocol
-      properties:
-        protocols:
-          type: array
-          items:
-            type: string
-          description: The acceptable protocols
-        features:
-          type: array
-          items:
-            type: string
-          description: The required features
     NegotiationResponse:
       type: object
       description: The negotiated notification protocol
@@ -63,6 +49,20 @@ components:
           items:
             type: string
           description: The available features for the negotiated protocol
+    NegotiationRequest:
+      type: object
+      description: A negotiation request for a notification protocol
+      properties:
+        protocols:
+          type: array
+          items:
+            type: string
+          description: The acceptable protocols
+        features:
+          type: array
+          items:
+            type: string
+          description: The required features
   securitySchemes:
     SolidAuthentication:
       type: http

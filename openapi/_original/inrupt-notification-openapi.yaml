@@ -456,6 +456,9 @@ tags:
   description: Public JSON Web Keys
 - name: subscription
   description: Subscription Management
+servers:
+- url: https://notification.inrupt.com
+  description: Base URL declared by the provider in apis.yml (roadmap#122).
 paths:
   /:
     post:

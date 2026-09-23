@@ -7,7 +7,7 @@ servers:
 - url: https://notification.inrupt.com
   description: Base URL declared by the provider in apis.yml (roadmap#122).
 tags:
-- name: subscription
+- name: Subscription
   description: Subscription Management
 paths:
   /subscriptions:
@@ -15,7 +15,7 @@ paths:
       summary: List all subscriptions
       operationId: listSubscriptions
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: page
         in: query
@@ -52,7 +52,7 @@ paths:
       summary: Create a new subscription
       operationId: createSubscription
       tags:
-      - subscription
+      - Subscription
       requestBody:
         content:
           application/json:
@@ -110,7 +110,7 @@ paths:
       summary: Remove an existing subscription
       operationId: removeSubscription
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: identifier
         in: path
@@ -140,7 +140,7 @@ paths:
       summary: Fetch an existing subscription
       operationId: fetchSubscription
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: identifier
         in: path
@@ -184,7 +184,7 @@ paths:
       summary: Fetch the delivery failures for a specific subscription
       operationId: listDeliveryFailures
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: identifier
         in: path
@@ -235,7 +235,7 @@ paths:
       summary: List all system subscriptions
       operationId: listSystemSubscriptions
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: page
         in: query
@@ -272,7 +272,7 @@ paths:
       summary: Create a new system subscription
       operationId: createSystemSubscription
       tags:
-      - subscription
+      - Subscription
       requestBody:
         content:
           application/json:
@@ -324,7 +324,7 @@ paths:
       summary: Remove an existing system subscription
       operationId: removeSystemSubscription
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: identifier
         in: path
@@ -354,7 +354,7 @@ paths:
       summary: Fetch an existing system subscription
       operationId: fetchSystemSubscription
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: identifier
         in: path
@@ -398,7 +398,7 @@ paths:
       summary: Fetch the delivery failures for a specific system subscription
       operationId: listSystemDeliveryFailures
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: identifier
         in: path
@@ -449,7 +449,7 @@ paths:
       summary: Reprocess any failed deliveries for the given system subscription
       operationId: reprocessSystemSubscription
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: subscription
         in: path
@@ -487,7 +487,7 @@ paths:
       summary: Fetch the status of a reprocessing task
       operationId: fetchSystemSubscriptionReprocessStatus
       tags:
-      - subscription
+      - Subscription
       parameters:
       - name: identifier
         in: path
@@ -524,60 +524,101 @@ paths:
       - SolidAuthentication: []
 components:
   schemas:
-    AsyncTask:
+    AuthenticationParameters:
       type: object
-      required:
-      - agent
-      - action
-      - subscription
-      - id
-      - status
-      - startedAt
-      - lastUpdatedAt
+      description: Parameters associated with the authentication mechanism
       properties:
-        agent:
+        serverCertificate:
           type: string
-          format: uri
-          description: WebID of the agent who triggered the reprocess task
-        action:
-          type: string
-          enum:
-          - retry
-          description: The action performed on reprocessed dispatches
-        subscription:
-          type: string
-          format: uuid
-          description: The reprocess task identifier
+          format: pem
+          description: A PEM-formatted X.509 server certificate
+    DeliveryFailure:
+      type: object
+      description: A data structure representing a delivery failure
+      properties:
         id:
           type: string
           format: uuid
-          readOnly: true
-          description: The task identifier
-        status:
+          description: The delivery failure identifier
+        request:
+          $ref: '#/components/schemas/NotificationContent'
+        response:
           type: string
-          readOnly: true
+          description: The failure response from the remote endpoint
+        date:
+          type: string
+          format: date-time
+          description: The date of the attempted message dispatch
+    NotificationContent:
+      type: object
+      description: The request data sent to a remote endpoint
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The delivery request identifier
+        type:
+          type: string
           enum:
-          - Pending
-          - Active
-          - Done
-          description: Status of the task
-        startedAt:
+          - AccessRequestPending
+          - AccessRequestDenied
+          - AccessGrantIssued
+          - AccessGrantRevoked
+          - AccessGrantExpired
+          - ResourceCreated
+          - ResourceUpdated
+          - ResourceDeleted
+          - ContainerCreated
+          - ContainerUpdated
+          - ContainerDeleted
+          description: The delivery request type
+        audience:
+          type: string
+          format: uri
+          description: The agent to whom the delivery request is directed
+        resource:
+          type: string
+          format: uri
+          description: The resource associated with the notification
+        controller:
+          type: string
+          format: uri
+          description: The controller or owner of the resource associated with the notification
+        subscription:
+          type: string
+          format: uuid
+          description: The subscription associated with the delivery request
+        purpose:
+          type: string
+          maxLength: 1024
+          description: The purpose of the associated subscription
+        dataMinimization:
+          type: object
+          required:
+          - retentionPeriod
+          description: Data minimization definitions associated with the subscription
+          properties:
+            retentionPeriod:
+              type: string
+              format: duration
+              examples:
+              - P30D
+              - P90D
+              - PT12H
+              - P1DT12H30M
+              pattern: ^P[0-9]+D(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?)$
+              description: The data retention period for this message
+        published:
           type: string
           format: date-time
-          readOnly: true
-          description: Starting time of the task
-        lastUpdatedAt:
-          type: string
-          format: date-time
-          readOnly: true
-          description: Last update time of the task
-    PageSubscription:
+          description: The date of the notification attempt
+    PageDeliveryFailure:
       type: object
       properties:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/Subscription'
+            $ref: '#/components/schemas/DeliveryFailure'
     HttpProblem:
       type: object
       additionalProperties: true
@@ -611,51 +652,6 @@ components:
           examples:
           - https://api.example.com/errors/123
           description: A URI reference that identifies the specific occurrence of the problem
-    DeliveryFailure:
-      type: object
-      description: A data structure representing a delivery failure
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: The delivery failure identifier
-        request:
-          $ref: '#/components/schemas/NotificationContent'
-        response:
-          type: string
-          description: The failure response from the remote endpoint
-        date:
-          type: string
-          format: date-time
-          description: The date of the attempted message dispatch
-    ReprocessRequest:
-      type: object
-      required:
-      - action
-      properties:
-        action:
-          type: string
-          enum:
-          - retry
-          description: Action to perform on the failed notifications
-    Dispatch:
-      type: object
-      required:
-      - type
-      - uri
-      description: The configured dispatch mechanism for a subscription
-      properties:
-        type:
-          type: string
-          enum:
-          - webhook
-          description: Dispatch type
-        uri:
-          type: string
-          format: uri
-          description: URL of the associated webhook
-        authentication:
-          $ref: '#/components/schemas/DispatchAuthentication'
     Subscription:
       type: object
       required:
@@ -733,69 +729,88 @@ components:
           type: string
           format: uri
           description: The URL of the resource storage associated with the subscription
-    NotificationContent:
+    AsyncTask:
       type: object
-      description: The request data sent to a remote endpoint
+      required:
+      - agent
+      - action
+      - subscription
+      - id
+      - status
+      - startedAt
+      - lastUpdatedAt
       properties:
-        id:
+        agent:
           type: string
-          format: uuid
-          description: The delivery request identifier
-        type:
+          format: uri
+          description: WebID of the agent who triggered the reprocess task
+        action:
           type: string
           enum:
-          - AccessRequestPending
-          - AccessRequestDenied
-          - AccessGrantIssued
-          - AccessGrantRevoked
-          - AccessGrantExpired
-          - ResourceCreated
-          - ResourceUpdated
-          - ResourceDeleted
-          - ContainerCreated
-          - ContainerUpdated
-          - ContainerDeleted
-          description: The delivery request type
-        audience:
-          type: string
-          format: uri
-          description: The agent to whom the delivery request is directed
-        resource:
-          type: string
-          format: uri
-          description: The resource associated with the notification
-        controller:
-          type: string
-          format: uri
-          description: The controller or owner of the resource associated with the notification
+          - retry
+          description: The action performed on reprocessed dispatches
         subscription:
           type: string
           format: uuid
-          description: The subscription associated with the delivery request
-        purpose:
+          description: The reprocess task identifier
+        id:
           type: string
-          maxLength: 1024
-          description: The purpose of the associated subscription
-        dataMinimization:
-          type: object
-          required:
-          - retentionPeriod
-          description: Data minimization definitions associated with the subscription
-          properties:
-            retentionPeriod:
-              type: string
-              format: duration
-              examples:
-              - P30D
-              - P90D
-              - PT12H
-              - P1DT12H30M
-              pattern: ^P[0-9]+D(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?)$
-              description: The data retention period for this message
-        published:
+          format: uuid
+          readOnly: true
+          description: The task identifier
+        status:
+          type: string
+          readOnly: true
+          enum:
+          - Pending
+          - Active
+          - Done
+          description: Status of the task
+        startedAt:
           type: string
           format: date-time
-          description: The date of the notification attempt
+          readOnly: true
+          description: Starting time of the task
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Last update time of the task
+    PageSubscription:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    Dispatch:
+      type: object
+      required:
+      - type
+      - uri
+      description: The configured dispatch mechanism for a subscription
+      properties:
+        type:
+          type: string
+          enum:
+          - webhook
+          description: Dispatch type
+        uri:
+          type: string
+          format: uri
+          description: URL of the associated webhook
+        authentication:
+          $ref: '#/components/schemas/DispatchAuthentication'
+    ReprocessRequest:
+      type: object
+      required:
+      - action
+      properties:
+        action:
+          type: string
+          enum:
+          - retry
+          description: Action to perform on the failed notifications
     DispatchAuthentication:
       type: object
       required:
@@ -809,21 +824,6 @@ components:
           description: Authentication type used with the dispatch mechanism
         parameters:
           $ref: '#/components/schemas/AuthenticationParameters'
-    AuthenticationParameters:
-      type: object
-      description: Parameters associated with the authentication mechanism
-      properties:
-        serverCertificate:
-          type: string
-          format: pem
-          description: A PEM-formatted X.509 server certificate
-    PageDeliveryFailure:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeliveryFailure'
   securitySchemes:
     SolidAuthentication:
       type: http
