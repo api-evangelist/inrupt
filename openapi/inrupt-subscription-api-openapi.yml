@@ -524,14 +524,6 @@ paths:
       - SolidAuthentication: []
 components:
   schemas:
-    AuthenticationParameters:
-      type: object
-      description: Parameters associated with the authentication mechanism
-      properties:
-        serverCertificate:
-          type: string
-          format: pem
-          description: A PEM-formatted X.509 server certificate
     DeliveryFailure:
       type: object
       description: A data structure representing a delivery failure
@@ -549,69 +541,6 @@ components:
           type: string
           format: date-time
           description: The date of the attempted message dispatch
-    NotificationContent:
-      type: object
-      description: The request data sent to a remote endpoint
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: The delivery request identifier
-        type:
-          type: string
-          enum:
-          - AccessRequestPending
-          - AccessRequestDenied
-          - AccessGrantIssued
-          - AccessGrantRevoked
-          - AccessGrantExpired
-          - ResourceCreated
-          - ResourceUpdated
-          - ResourceDeleted
-          - ContainerCreated
-          - ContainerUpdated
-          - ContainerDeleted
-          description: The delivery request type
-        audience:
-          type: string
-          format: uri
-          description: The agent to whom the delivery request is directed
-        resource:
-          type: string
-          format: uri
-          description: The resource associated with the notification
-        controller:
-          type: string
-          format: uri
-          description: The controller or owner of the resource associated with the notification
-        subscription:
-          type: string
-          format: uuid
-          description: The subscription associated with the delivery request
-        purpose:
-          type: string
-          maxLength: 1024
-          description: The purpose of the associated subscription
-        dataMinimization:
-          type: object
-          required:
-          - retentionPeriod
-          description: Data minimization definitions associated with the subscription
-          properties:
-            retentionPeriod:
-              type: string
-              format: duration
-              examples:
-              - P30D
-              - P90D
-              - PT12H
-              - P1DT12H30M
-              pattern: ^P[0-9]+D(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?)$
-              description: The data retention period for this message
-        published:
-          type: string
-          format: date-time
-          description: The date of the notification attempt
     PageDeliveryFailure:
       type: object
       properties:
@@ -619,39 +548,44 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DeliveryFailure'
-    HttpProblem:
+    PageSubscription:
       type: object
-      additionalProperties: true
-      description: HTTP Problem Response according to RFC9457 and RFC7807
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    Dispatch:
+      type: object
+      required:
+      - type
+      - uri
+      description: The configured dispatch mechanism for a subscription
       properties:
         type:
           type: string
-          format: uri
-          examples:
-          - https://example.com/errors/not-found
-          description: A optional URI reference that identifies the problem type
-        title:
-          type: string
-          examples:
-          - Not Found
-          description: A optional, short, human-readable summary of the problem type
-        status:
-          type: integer
-          format: int32
-          examples:
-          - 404
-          description: The HTTP status code for this occurrence of the problem
-        detail:
-          type: string
-          examples:
-          - Record not found
-          description: A optional human-readable explanation specific to this occurrence of the problem
-        instance:
+          enum:
+          - webhook
+          description: Dispatch type
+        uri:
           type: string
           format: uri
-          examples:
-          - https://api.example.com/errors/123
-          description: A URI reference that identifies the specific occurrence of the problem
+          description: URL of the associated webhook
+        authentication:
+          $ref: '#/components/schemas/DispatchAuthentication'
+    DispatchAuthentication:
+      type: object
+      required:
+      - type
+      description: The authentication configuration for a dispatch mechanism
+      properties:
+        type:
+          type: string
+          enum:
+          - mtls
+          description: Authentication type used with the dispatch mechanism
+        parameters:
+          $ref: '#/components/schemas/AuthenticationParameters'
     Subscription:
       type: object
       required:
@@ -729,6 +663,112 @@ components:
           type: string
           format: uri
           description: The URL of the resource storage associated with the subscription
+    ReprocessRequest:
+      type: object
+      required:
+      - action
+      properties:
+        action:
+          type: string
+          enum:
+          - retry
+          description: Action to perform on the failed notifications
+    HttpProblem:
+      type: object
+      additionalProperties: true
+      description: HTTP Problem Response according to RFC9457 and RFC7807
+      properties:
+        type:
+          type: string
+          format: uri
+          examples:
+          - https://example.com/errors/not-found
+          description: A optional URI reference that identifies the problem type
+        title:
+          type: string
+          examples:
+          - Not Found
+          description: A optional, short, human-readable summary of the problem type
+        status:
+          type: integer
+          format: int32
+          examples:
+          - 404
+          description: The HTTP status code for this occurrence of the problem
+        detail:
+          type: string
+          examples:
+          - Record not found
+          description: A optional human-readable explanation specific to this occurrence of the problem
+        instance:
+          type: string
+          format: uri
+          examples:
+          - https://api.example.com/errors/123
+          description: A URI reference that identifies the specific occurrence of the problem
+    NotificationContent:
+      type: object
+      description: The request data sent to a remote endpoint
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The delivery request identifier
+        type:
+          type: string
+          enum:
+          - AccessRequestPending
+          - AccessRequestDenied
+          - AccessGrantIssued
+          - AccessGrantRevoked
+          - AccessGrantExpired
+          - ResourceCreated
+          - ResourceUpdated
+          - ResourceDeleted
+          - ContainerCreated
+          - ContainerUpdated
+          - ContainerDeleted
+          description: The delivery request type
+        audience:
+          type: string
+          format: uri
+          description: The agent to whom the delivery request is directed
+        resource:
+          type: string
+          format: uri
+          description: The resource associated with the notification
+        controller:
+          type: string
+          format: uri
+          description: The controller or owner of the resource associated with the notification
+        subscription:
+          type: string
+          format: uuid
+          description: The subscription associated with the delivery request
+        purpose:
+          type: string
+          maxLength: 1024
+          description: The purpose of the associated subscription
+        dataMinimization:
+          type: object
+          required:
+          - retentionPeriod
+          description: Data minimization definitions associated with the subscription
+          properties:
+            retentionPeriod:
+              type: string
+              format: duration
+              examples:
+              - P30D
+              - P90D
+              - PT12H
+              - P1DT12H30M
+              pattern: ^P[0-9]+D(?:T(?=[0-9])(?:[0-9]+H)?(?:[0-9]+M)?)$
+              description: The data retention period for this message
+        published:
+          type: string
+          format: date-time
+          description: The date of the notification attempt
     AsyncTask:
       type: object
       required:
@@ -776,54 +816,14 @@ components:
           format: date-time
           readOnly: true
           description: Last update time of the task
-    PageSubscription:
+    AuthenticationParameters:
       type: object
+      description: Parameters associated with the authentication mechanism
       properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/Subscription'
-    Dispatch:
-      type: object
-      required:
-      - type
-      - uri
-      description: The configured dispatch mechanism for a subscription
-      properties:
-        type:
+        serverCertificate:
           type: string
-          enum:
-          - webhook
-          description: Dispatch type
-        uri:
-          type: string
-          format: uri
-          description: URL of the associated webhook
-        authentication:
-          $ref: '#/components/schemas/DispatchAuthentication'
-    ReprocessRequest:
-      type: object
-      required:
-      - action
-      properties:
-        action:
-          type: string
-          enum:
-          - retry
-          description: Action to perform on the failed notifications
-    DispatchAuthentication:
-      type: object
-      required:
-      - type
-      description: The authentication configuration for a dispatch mechanism
-      properties:
-        type:
-          type: string
-          enum:
-          - mtls
-          description: Authentication type used with the dispatch mechanism
-        parameters:
-          $ref: '#/components/schemas/AuthenticationParameters'
+          format: pem
+          description: A PEM-formatted X.509 server certificate
   securitySchemes:
     SolidAuthentication:
       type: http
