@@ -524,6 +524,143 @@ paths:
       - SolidAuthentication: []
 components:
   schemas:
+    Dispatch:
+      type: object
+      required:
+      - type
+      - uri
+      description: The configured dispatch mechanism for a subscription
+      properties:
+        type:
+          type: string
+          enum:
+          - webhook
+          description: Dispatch type
+        uri:
+          type: string
+          format: uri
+          description: URL of the associated webhook
+        authentication:
+          $ref: '#/components/schemas/DispatchAuthentication'
+    PageSubscription:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+    AuthenticationParameters:
+      type: object
+      description: Parameters associated with the authentication mechanism
+      properties:
+        serverCertificate:
+          type: string
+          format: pem
+          description: A PEM-formatted X.509 server certificate
+    PageDeliveryFailure:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryFailure'
+    AsyncTask:
+      type: object
+      required:
+      - agent
+      - action
+      - subscription
+      - id
+      - status
+      - startedAt
+      - lastUpdatedAt
+      properties:
+        agent:
+          type: string
+          format: uri
+          description: WebID of the agent who triggered the reprocess task
+        action:
+          type: string
+          enum:
+          - retry
+          description: The action performed on reprocessed dispatches
+        subscription:
+          type: string
+          format: uuid
+          description: The reprocess task identifier
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: The task identifier
+        status:
+          type: string
+          readOnly: true
+          enum:
+          - Pending
+          - Active
+          - Done
+          description: Status of the task
+        startedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Starting time of the task
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Last update time of the task
+    HttpProblem:
+      type: object
+      additionalProperties: true
+      description: HTTP Problem Response according to RFC9457 and RFC7807
+      properties:
+        type:
+          type: string
+          format: uri
+          examples:
+          - https://example.com/errors/not-found
+          description: A optional URI reference that identifies the problem type
+        title:
+          type: string
+          examples:
+          - Not Found
+          description: A optional, short, human-readable summary of the problem type
+        status:
+          type: integer
+          format: int32
+          examples:
+          - 404
+          description: The HTTP status code for this occurrence of the problem
+        detail:
+          type: string
+          examples:
+          - Record not found
+          description: A optional human-readable explanation specific to this occurrence of the problem
+        instance:
+          type: string
+          format: uri
+          examples:
+          - https://api.example.com/errors/123
+          description: A URI reference that identifies the specific occurrence of the problem
+    DeliveryFailure:
+      type: object
+      description: A data structure representing a delivery failure
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The delivery failure identifier
+        request:
+          $ref: '#/components/schemas/NotificationContent'
+        response:
+          type: string
+          description: The failure response from the remote endpoint
+        date:
+          type: string
+          format: date-time
+          description: The date of the attempted message dispatch
     Subscription:
       type: object
       required:
@@ -601,153 +738,19 @@ components:
           type: string
           format: uri
           description: The URL of the resource storage associated with the subscription
-    HttpProblem:
-      type: object
-      additionalProperties: true
-      description: HTTP Problem Response according to RFC9457 and RFC7807
-      properties:
-        type:
-          type: string
-          format: uri
-          examples:
-          - https://example.com/errors/not-found
-          description: A optional URI reference that identifies the problem type
-        title:
-          type: string
-          examples:
-          - Not Found
-          description: A optional, short, human-readable summary of the problem type
-        status:
-          type: integer
-          format: int32
-          examples:
-          - 404
-          description: The HTTP status code for this occurrence of the problem
-        detail:
-          type: string
-          examples:
-          - Record not found
-          description: A optional human-readable explanation specific to this occurrence of the problem
-        instance:
-          type: string
-          format: uri
-          examples:
-          - https://api.example.com/errors/123
-          description: A URI reference that identifies the specific occurrence of the problem
-    ReprocessRequest:
-      type: object
-      required:
-      - action
-      properties:
-        action:
-          type: string
-          enum:
-          - retry
-          description: Action to perform on the failed notifications
-    PageDeliveryFailure:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeliveryFailure'
-    AsyncTask:
-      type: object
-      required:
-      - agent
-      - action
-      - subscription
-      - id
-      - status
-      - startedAt
-      - lastUpdatedAt
-      properties:
-        agent:
-          type: string
-          format: uri
-          description: WebID of the agent who triggered the reprocess task
-        action:
-          type: string
-          enum:
-          - retry
-          description: The action performed on reprocessed dispatches
-        subscription:
-          type: string
-          format: uuid
-          description: The reprocess task identifier
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-          description: The task identifier
-        status:
-          type: string
-          readOnly: true
-          enum:
-          - Pending
-          - Active
-          - Done
-          description: Status of the task
-        startedAt:
-          type: string
-          format: date-time
-          readOnly: true
-          description: Starting time of the task
-        lastUpdatedAt:
-          type: string
-          format: date-time
-          readOnly: true
-          description: Last update time of the task
-    DeliveryFailure:
-      type: object
-      description: A data structure representing a delivery failure
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: The delivery failure identifier
-        request:
-          $ref: '#/components/schemas/NotificationContent'
-        response:
-          type: string
-          description: The failure response from the remote endpoint
-        date:
-          type: string
-          format: date-time
-          description: The date of the attempted message dispatch
-    AuthenticationParameters:
-      type: object
-      description: Parameters associated with the authentication mechanism
-      properties:
-        serverCertificate:
-          type: string
-          format: pem
-          description: A PEM-formatted X.509 server certificate
-    PageSubscription:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/Subscription'
-    Dispatch:
+    DispatchAuthentication:
       type: object
       required:
       - type
-      - uri
-      description: The configured dispatch mechanism for a subscription
+      description: The authentication configuration for a dispatch mechanism
       properties:
         type:
           type: string
           enum:
-          - webhook
-          description: Dispatch type
-        uri:
-          type: string
-          format: uri
-          description: URL of the associated webhook
-        authentication:
-          $ref: '#/components/schemas/DispatchAuthentication'
+          - mtls
+          description: Authentication type used with the dispatch mechanism
+        parameters:
+          $ref: '#/components/schemas/AuthenticationParameters'
     NotificationContent:
       type: object
       description: The request data sent to a remote endpoint
@@ -811,19 +814,16 @@ components:
           type: string
           format: date-time
           description: The date of the notification attempt
-    DispatchAuthentication:
+    ReprocessRequest:
       type: object
       required:
-      - type
-      description: The authentication configuration for a dispatch mechanism
+      - action
       properties:
-        type:
+        action:
           type: string
           enum:
-          - mtls
-          description: Authentication type used with the dispatch mechanism
-        parameters:
-          $ref: '#/components/schemas/AuthenticationParameters'
+          - retry
+          description: Action to perform on the failed notifications
   securitySchemes:
     SolidAuthentication:
       type: http
