@@ -1,0 +1,12 @@
+{
+ "url": "https://notification.inrupt.com/openapi.yaml",
+ "requested_url": "https://notification.inrupt.com/openapi.yaml",
+ "status": 200,
+ "content_type": "application/yaml;charset=UTF-8",
+ "bytes": 30836,
+ "sha256": "6d600fac4a9f7c2cd4f1b7c67965d0acdeaa01a6e0e69b82b2f8be1e3100e96b",
+ "fetched_at": "2026-10-04",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "equivalent",
+ "note": "Re-fetched from the provider by verify-openapi-sources.py; the provider's current document describes the same operations (Jaccard 1.0), but the bytes differ, so the archive is an earlier or reformatted copy."
+}
